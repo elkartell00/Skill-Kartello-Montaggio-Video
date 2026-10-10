@@ -1,14 +1,14 @@
-# Skills Kartello Video
+# Skill Kartello Montaggio Video
 
-Marketplace di plugin per [Claude Code](https://code.claude.com) con le skill di Kartello dedicate ai video.
+Marketplace di plugin per [Claude Code](https://code.claude.com) con le skill di Kartello per il montaggio video.
 
 ## Struttura
 
 ```text
 .claude-plugin/
-  marketplace.json              # catalogo del marketplace "kartello-skills"
+  marketplace.json              # catalogo del marketplace "kartello-montaggio-video"
 plugins/
-  kartello-video/
+  montaggio-video/
     .claude-plugin/plugin.json  # manifest del plugin
     skills/
       <nome-skill>/
@@ -24,27 +24,27 @@ templates/
 Da un terminale con Claude Code:
 
 ```bash
-claude plugin marketplace add elkartell00/Skills-Kartello-Video
-claude plugin install kartello-video@kartello-skills
+claude plugin marketplace add elkartell00/Skill-Kartello-Montaggio-Video
+claude plugin install montaggio-video@kartello-montaggio-video
 ```
 
-Oppure dentro una sessione: `/plugin marketplace add elkartell00/Skills-Kartello-Video`, poi `/plugin install kartello-video@kartello-skills`.
+Oppure dentro una sessione: `/plugin marketplace add elkartell00/Skill-Kartello-Montaggio-Video`, poi `/plugin install montaggio-video@kartello-montaggio-video`.
 
-Le skill si richiamano con `/kartello-video:<nome-skill>`, oppure Claude le usa da solo quando la richiesta corrisponde alla loro `description`.
+Le skill si richiamano con `/montaggio-video:<nome-skill>`, oppure Claude le usa da solo quando la richiesta corrisponde alla loro `description`.
 
 ## Sviluppo
 
 Provare il plugin senza installarlo:
 
 ```bash
-claude --plugin-dir ./plugins/kartello-video
+claude --plugin-dir ./plugins/montaggio-video
 ```
 
 Validare marketplace e plugin prima di ogni push:
 
 ```bash
 claude plugin validate .
-claude plugin validate ./plugins/kartello-video
+claude plugin validate ./plugins/montaggio-video
 ```
 
-Per aggiungere una skill: copia `templates/SKILL.template.md` in `plugins/kartello-video/skills/<nome-skill>/SKILL.md` e compila i campi.
+Per aggiungere una skill: copia `templates/SKILL.template.md` in `plugins/montaggio-video/skills/<nome-skill>/SKILL.md` e compila i campi.

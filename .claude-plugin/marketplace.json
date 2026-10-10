@@ -1,14 +1,14 @@
 {
-  "name": "kartello-skills",
-  "description": "Skill per Claude Code di Kartello",
+  "name": "kartello-montaggio-video",
+  "description": "Skill per Claude Code di Kartello per il montaggio video",
   "owner": {
     "name": "elkartell00"
   },
   "plugins": [
     {
-      "name": "kartello-video",
-      "source": "./plugins/kartello-video",
-      "description": "Skill di Kartello dedicate ai video"
+      "name": "montaggio-video",
+      "source": "./plugins/montaggio-video",
+      "description": "Skill di Kartello per il montaggio video"
     }
   ]
 }
