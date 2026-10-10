@@ -1,0 +1,14 @@
+{
+  "name": "kartello-skills",
+  "description": "Skill per Claude Code di Kartello",
+  "owner": {
+    "name": "elkartell00"
+  },
+  "plugins": [
+    {
+      "name": "kartello-video",
+      "source": "./plugins/kartello-video",
+      "description": "Skill di Kartello dedicate ai video"
+    }
+  ]
+}
