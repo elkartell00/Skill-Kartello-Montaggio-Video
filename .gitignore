@@ -9,5 +9,5 @@ __pycache__/
 *.pyc
 .env
 .claude/settings.local.json
-montaggio-video/
+/montaggio-video/
 *-workspace/
