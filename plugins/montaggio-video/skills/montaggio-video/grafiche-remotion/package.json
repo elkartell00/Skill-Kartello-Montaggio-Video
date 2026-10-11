@@ -1,0 +1,13 @@
+{
+  "name": "montaggio-video-grafiche",
+  "private": true,
+  "description": "Grafiche della skill montaggio-video: progetto Remotion e motore di animazione (Playwright)",
+  "dependencies": {
+    "@remotion/cli": "4.0.534",
+    "@remotion/renderer": "4.0.534",
+    "playwright": "^1.56.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.534"
+  }
+}

@@ -12,8 +12,9 @@ Logica:
 - pause: quelle più lunghe di --pausa-max vengono accorciate a --pausa-lascia.
 - ogni taglio cade su un fotogramma intero, con un piccolo margine prima e dopo la voce.
 
-Scrive .lavoro/<progetto>/piano-montaggio.json (modificabile a mano o da Claude) e piano-montaggio.md
-(riepilogo leggibile con ogni taglio e il motivo).
+Scrive .lavoro/<progetto>/piani/<piano>.json (modificabile a mano o da Claude) e <piano>.md (riepilogo
+leggibile con ogni taglio e il motivo). Il nome del piano predefinito è il formato (es. video-lungo).
+Per più montaggi nello stesso progetto (es. shorts indipendenti da riprese diverse) usa --piano e --sorgenti.
 """
 import argparse
 import difflib
@@ -22,7 +23,8 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from comune import FORMATI, cartelle_progetto, errore, info, leggi_json, quantizza, scrivi_json, tc  # noqa: E402
+from comune import (FORMATI, cartelle_progetto, errore, info, leggi_json, percorsi_piano, quantizza,  # noqa: E402
+                    scrivi_json, tc)
 
 INTERCALARI = {"ehm", "ehmm", "emh", "eem", "ehh", "ehhh", "uhm", "uhmm", "um", "umm", "uh", "uhh", "mmm", "mm",
                "mh", "mhm", "hmm", "hm", "ehmmm", "eeh", "eeeh", "aah", "ahm"}
@@ -145,7 +147,11 @@ def main():
     ap.add_argument("--margine", type=float, default=0.08, help="margine prima e dopo la voce (s)")
     ap.add_argument("--senza-ripetizioni", action="store_true", help="non cercare frasi ripetute")
     ap.add_argument("--tieni-intercalari", action="store_true")
-    ap.add_argument("--fps", help="fotogrammi al secondo dell'uscita (predefinito: quelli della prima ripresa)")
+    ap.add_argument("--fps", help="fotogrammi al secondo dell'uscita (predefinito: quelli della prima ripresa usata)")
+    ap.add_argument("--piano", help="nome del piano (predefinito: il formato, es. video-lungo)")
+    ap.add_argument("--sorgenti", help="riprese da usare, per indice (es. 0,2); predefinito: tutte")
+    ap.add_argument("--intervalli", help="solo questi tratti, nell'ordine indicato: ripresa:da-a separati da virgola "
+                    "(es. 0:125.3-172.8 oppure 0:301.2-305.0,0:125.3-172.8 per mettere prima l'aggancio)")
     a = ap.parse_args()
 
     c = cartelle_progetto(a.progetto, a.cartella)
@@ -158,17 +164,42 @@ def main():
         W, H = map(int, a.formato.split("x"))
     else:
         errore(f"formato sconosciuto: {a.formato}")
-    fps = a.fps or analisi["sorgenti"][0]["fps"]
+    usate = analisi["sorgenti"]
+    if a.sorgenti:
+        scelte = {int(x) for x in a.sorgenti.split(",")}
+        usate = [s for s in usate if s["indice"] in scelte]
+        if not usate:
+            errore(f"nessuna ripresa con indice {a.sorgenti}.")
+    fps = a.fps or usate[0]["fps"]
+    nome = a.piano or (a.formato if a.formato in FORMATI else "personalizzato")
+    P = percorsi_piano(c, nome)
+    trascr_per = {t["indice"]: t for t in trascr["sorgenti"]}
+
+    per_indice = {s["indice"]: s for s in analisi["sorgenti"]}
+    if a.intervalli:
+        tratti = []
+        for parte in a.intervalli.split(","):
+            m = re.fullmatch(r"\s*(\d+):([\d.]+)-([\d.]+)\s*", parte)
+            if not m or int(m.group(1)) not in per_indice:
+                errore(f"intervallo non valido: '{parte}' (formato ripresa:da-a, es. 0:125.3-172.8)")
+            tratti.append((per_indice[int(m.group(1))], float(m.group(2)), float(m.group(3))))
+        usate = [t[0] for t in tratti]
+        fps = a.fps or usate[0]["fps"]
+    else:
+        tratti = [(s, 0.0, s["durata"]) for s in usate]
 
     segmenti, tagli = [], []
-    for src, tr in zip(analisi["sorgenti"], trascr["sorgenti"]):
-        parole = tr["parole"]
+    for src, t_da, t_a in tratti:
+        tr = trascr_per.get(src["indice"], {"parole": []})
+        parole = [dict(p) for p in tr["parole"] if t_da <= (p["inizio"] + p["fine"]) / 2 < t_a]
         segna_intercalari(parole, a.tieni_intercalari)
         if not a.senza_ripetizioni:
             segna_ripetizioni(parole, raggruppa_frasi(parole))
         keep = intervalli(parole, fps, a.pausa_max, a.pausa_lascia, a.margine, src["durata"])
-        if not parole:  # nessuna voce: si tiene tutta la ripresa
-            keep = [[0.0, quantizza(src["durata"], fps)]]
+        keep = [[max(x, quantizza(t_da, fps)), min(y, quantizza(t_a, fps))] for x, y in keep]
+        keep = [k for k in keep if k[1] > k[0]]
+        if not parole:  # nessuna voce: si tiene tutto il tratto
+            keep = [[quantizza(t_da, fps), quantizza(t_a, fps)]]
         for ini, fin in keep:
             dentro = [p["w"] for p in parole if not p["taglia"] and p["inizio"] >= ini - 0.01 and p["fine"] <= fin + 0.01]
             segmenti.append({"id": len(segmenti) + 1, "sorgente": src["indice"], "inizio": ini, "fine": fin,
@@ -187,13 +218,15 @@ def main():
         for (a1, b1), (a2, b2) in zip(keep, keep[1:]):
             if a2 - b1 > 0.05 and not any(t["sorgente"] == src["indice"] and t["inizio"] >= b1 - 0.1 and t["fine"] <= a2 + 0.1 for t in tagli):
                 tagli.append({"sorgente": src["indice"], "inizio": b1, "fine": a2, "motivo": "pausa", "testo": ""})
-    tagli.sort(key=lambda t: (t["sorgente"], t["inizio"]))
+    if not a.intervalli:
+        tagli.sort(key=lambda t: (t["sorgente"], t["inizio"]))
 
-    durata_orig = sum(s["durata"] for s in analisi["sorgenti"])
+    durata_orig = sum(t_a - t_da for _, t_da, t_a in tratti)
     durata_fin = sum(s["fine"] - s["inizio"] for s in segmenti)
     piano = {
         "schema": 1,
         "progetto": a.progetto,
+        "nome": nome,
         "profilo": prog.get("profilo", "base"),
         "formato": a.formato,
         "larghezza": W, "altezza": H, "fps": fps,
@@ -206,22 +239,22 @@ def main():
         "audio": {},
         "note": [],
     }
-    scrivi_json(c["lavoro"] / "piano-montaggio.json", piano)
+    scrivi_json(P["piano"], piano)
 
     conta = {}
     for t in tagli:
         conta[t["motivo"]] = conta.get(t["motivo"], 0) + 1
-    righe = [f"# Piano di montaggio: {a.progetto}", "",
+    righe = [f"# Piano di montaggio: {a.progetto} / {nome}", "",
              f"Formato {a.formato} {W}x{H}, {fps} fps. Durata: {tc(durata_orig)} -> {tc(durata_fin)} "
              f"({100 * (1 - durata_fin / max(durata_orig, 0.001)):.0f}% in meno), {len(segmenti)} segmenti.", "",
              "Tagli: " + ", ".join(f"{v} {k}" for k, v in sorted(conta.items())), "",
              "| Ripresa | Da | A | Motivo | Testo tagliato |", "|---|---|---|---|---|"]
     for t in tagli:
         righe.append(f"| {t['sorgente']:02d} | {tc(t['inizio'])} | {tc(t['fine'])} | {t['motivo']} | {t['testo']} |")
-    (c["lavoro"] / "piano-montaggio.md").write_text("\n".join(righe) + "\n", encoding="utf-8")
+    P["riepilogo"].write_text("\n".join(righe) + "\n", encoding="utf-8")
     info(righe[2])
     info(righe[4])
-    info(f"Piano salvato in {c['lavoro'] / 'piano-montaggio.json'} (riepilogo: piano-montaggio.md)")
+    info(f"Piano '{nome}' salvato in {P['piano']} (riepilogo: {P['riepilogo'].name})")
 
 
 if __name__ == "__main__":

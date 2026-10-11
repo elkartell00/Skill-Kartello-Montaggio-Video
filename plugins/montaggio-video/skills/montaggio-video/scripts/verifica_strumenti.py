@@ -120,7 +120,8 @@ def installa(root):
         if r.returncode != 0:
             print("ERRORE: non riesco a creare l'ambiente Python. Su Mac installa Python con `brew install python`.", file=sys.stderr)
             sys.exit(1)
-    pacchetti = ["numpy", pacchetto_whisper()]
+    # OpenCV 4.x: la 5 non ha più il rilevatore di volti classico (serve per la riinquadratura).
+    pacchetti = ["numpy", "opencv-python-headless<5", pacchetto_whisper()]
     print(f"Installo: {', '.join(pacchetti)} (la prima volta può richiedere qualche minuto) ...")
     r = subprocess.run([str(py), "-m", "pip", "install", "--upgrade", "pip"], capture_output=True)
     r = subprocess.run([str(py), "-m", "pip", "install", *pacchetti])

@@ -230,3 +230,103 @@ def tc(t):
     """Secondi -> m:ss.cc per i riepiloghi."""
     t = max(0.0, float(t))
     return f"{int(t // 60)}:{t % 60:05.2f}"
+
+
+# ------------------------------------------------------------------ timeline
+# Transizioni disponibili (nome nel piano -> transizione xfade di FFmpeg).
+TRANSIZIONI = {
+    "dissolvenza": "fade", "flash": "fadewhite", "nero": "fadeblack", "glitch": "pixelize",
+    "scorri-sinistra": "slideleft", "scorri-destra": "slideright", "scorri-su": "slideup", "scorri-giu": "slidedown",
+    "frusta": "smoothleft", "zoom": "zoomin", "cerchio": "circleopen", "sfocatura": "hblur", "tendina": "wipeleft",
+}
+
+
+def n_fotogrammi(secondi, fps):
+    return max(1, round(secondi * float(Fraction(fps))))
+
+
+def calcola_timeline(piano):
+    """Pezzi da renderizzare in ordine (segmenti e transizioni) e posizione di ogni segmento sulla timeline.
+
+    Una transizione di durata d tra A e B usa gli ultimi d secondi di A e i primi d di B sovrapposti:
+    la timeline si accorcia di d. Le transizioni valgono solo tra segmenti a velocità normale e
+    abbastanza lunghi; le altre vengono ignorate con un avviso.
+    Restituisce (pezzi, mappa, durata_totale). mappa[id_segmento] = (tempo sulla timeline che
+    corrisponde a seg.inizio, velocità): per portare un tempo della ripresa sulla timeline.
+    """
+    fps = piano["fps"]
+    f = float(Fraction(fps))
+    segs = piano["segmenti"]
+    n = len(segs)
+    d_in = [0.0] * (n + 1)
+    for i in range(1, n):
+        tr = segs[i].get("transizione")
+        if not tr:
+            continue
+        nome = tr.get("tipo", "dissolvenza")
+        if nome not in TRANSIZIONI:
+            avviso(f"transizione sconosciuta '{nome}' nel segmento {segs[i]['id']}: ignorata. Valori: {', '.join(TRANSIZIONI)}")
+            continue
+        d = n_fotogrammi(tr.get("durata", 0.4), fps) / f
+        a, b = segs[i - 1], segs[i]
+        if a.get("velocita", 1) != 1 or b.get("velocita", 1) != 1:
+            avviso(f"transizione nel segmento {b['id']} ignorata: non si combina con un cambio di velocità.")
+            continue
+        if (a["fine"] - a["inizio"]) - d_in[i - 1] < d + 2 / f or (b["fine"] - b["inizio"]) < d + 2 / f:
+            avviso(f"transizione nel segmento {b['id']} ignorata: segmenti troppo corti.")
+            continue
+        d_in[i] = d
+    pezzi, mappa, t = [], {}, 0.0
+    for i, s in enumerate(segs):
+        v = float(s.get("velocita", 1) or 1)
+        if d_in[i]:
+            nf = n_fotogrammi(d_in[i], fps)
+            pezzi.append({"tipo": "transizione", "da": segs[i - 1], "a": s, "nome": s["transizione"].get("tipo", "dissolvenza"),
+                          "fotogrammi": nf, "durata": nf / f, "inizio_t": t})
+            t += nf / f
+        mappa[s["id"]] = (t - d_in[i], v)
+        da, a = s["inizio"] + d_in[i], s["fine"] - d_in[i + 1]
+        nf = n_fotogrammi((a - da) / v, fps)
+        pezzi.append({"tipo": "segmento", "seg": s, "da": da, "a": a, "velocita": v, "fotogrammi": nf, "durata": nf / f, "inizio_t": t})
+        t += nf / f
+    return pezzi, mappa, t
+
+
+# ------------------------------------------------------------------ piani
+# Un progetto può avere più montaggi (video lungo, short-1, short-2, reel-1...): uno per piano.
+def nome_piano_valido(nome):
+    import re as _re
+    if not _re.fullmatch(r"[a-z0-9][a-z0-9-]*", nome or ""):
+        errore(f"nome del piano non valido: '{nome}'. Usa lettere minuscole, numeri e trattini (es. short-1).")
+    return nome
+
+
+def percorsi_piano(cartelle, nome):
+    nome_piano_valido(nome)
+    lav = cartelle["lavoro"]
+    return {
+        "piano": lav / "piani" / f"{nome}.json",
+        "riepilogo": lav / "piani" / f"{nome}.md",
+        "srt": lav / "sottotitoli" / f"{nome}.srt",
+        "ass": lav / "sottotitoli" / f"{nome}.ass",
+        "parole": lav / "sottotitoli" / f"{nome}-parole.json",
+        "risultati": cartelle["risultati"] / nome,
+        "segmenti": lav / "segmenti",
+    }
+
+
+def piani_del_progetto(cartelle):
+    d = cartelle["lavoro"] / "piani"
+    return sorted(p.stem for p in d.glob("*.json")) if d.exists() else []
+
+
+def scegli_piano(cartelle, nome=None):
+    """Il piano indicato, oppure l'unico del progetto."""
+    if nome:
+        return nome_piano_valido(nome)
+    piani = piani_del_progetto(cartelle)
+    if len(piani) == 1:
+        return piani[0]
+    if not piani:
+        errore("il progetto non ha ancora un piano di montaggio: esegui prima pulizia.py.")
+    errore(f"il progetto ha più piani ({', '.join(piani)}): indica quale con --piano.")

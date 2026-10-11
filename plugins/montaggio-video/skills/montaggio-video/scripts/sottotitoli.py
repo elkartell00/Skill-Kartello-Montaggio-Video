@@ -5,10 +5,10 @@ uso:
                         [--parole-per-blocco 3] [--font Geist] [--dimensione 64] [--colore FFFFFF]
                         [--evidenzia FF5A1F] [--posizione 0.78] [--maiuscolo]
 
-Scrive in .lavoro/<progetto>/:
-  parole-timeline.json  ogni parola con i tempi sulla timeline montata (lo usano anche le grafiche)
-  sottotitoli.srt       file da caricare su YouTube o da importare in DaVinci
-  sottotitoli.ass       stesso testo con stile, da bruciare nel video (anteprima e shorts)
+Scrive in .lavoro/<progetto>/sottotitoli/:
+  <piano>-parole.json  ogni parola con i tempi sulla timeline montata (lo usano anche le grafiche)
+  <piano>.srt          file da caricare su YouTube o da importare in DaVinci
+  <piano>.ass          stesso testo con stile, da bruciare nel video (anteprima e shorts)
 
 stile frase:  blocchi di 1-2 righe, per i video lunghi.
 stile parole: pochi parole per volta, con la parola detta evidenziata (tipico di Shorts e Reels).
@@ -19,22 +19,25 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from comune import cartelle_progetto, info, leggi_json, scrivi_json  # noqa: E402
+from comune import calcola_timeline, cartelle_progetto, info, leggi_json, percorsi_piano, scegli_piano, scrivi_json  # noqa: E402
 
 
 def parole_sulla_timeline(piano, trascr):
+    """Porta ogni parola tenuta sulla timeline montata (tiene conto di velocità e transizioni)."""
+    _, mappa, _ = calcola_timeline(piano)
     per_src = {s["indice"]: s["parole"] for s in trascr["sorgenti"]}
-    out, t_out = [], 0.0
+    out = []
     for seg in piano["segmenti"]:
+        t0, v = mappa[seg["id"]]
         for p in per_src.get(seg["sorgente"], []):
             if p.get("taglia"):
                 continue
             centro = (p["inizio"] + p["fine"]) / 2
             if seg["inizio"] <= centro < seg["fine"]:
-                ini = t_out + max(0.0, p["inizio"] - seg["inizio"])
-                fin = t_out + min(seg["fine"], p["fine"]) - seg["inizio"]
+                ini = t0 + max(0.0, p["inizio"] - seg["inizio"]) / v
+                fin = t0 + (min(seg["fine"], p["fine"]) - seg["inizio"]) / v
                 out.append({"w": p["w"], "inizio": round(ini, 3), "fine": round(max(fin, ini + 0.05), 3), "segmento": seg["id"]})
-        t_out += seg["fine"] - seg["inizio"]
+    out.sort(key=lambda w: w["inizio"])
     return out
 
 
@@ -100,6 +103,7 @@ def main():
     ap = argparse.ArgumentParser(description="Sottotitoli sulla timeline montata")
     ap.add_argument("--progetto", required=True)
     ap.add_argument("--cartella")
+    ap.add_argument("--piano", help="nome del piano (se il progetto ne ha più di uno)")
     ap.add_argument("--stile", choices=["frase", "parole"], default="frase")
     ap.add_argument("--max-caratteri", type=int, default=42)
     ap.add_argument("--max-righe", type=int, default=2)
@@ -114,7 +118,8 @@ def main():
     a = ap.parse_args()
 
     c = cartelle_progetto(a.progetto, a.cartella)
-    piano = leggi_json(c["lavoro"] / "piano-montaggio.json")
+    P = percorsi_piano(c, scegli_piano(c, a.piano))
+    piano = leggi_json(P["piano"])
     trascr = leggi_json(c["lavoro"] / "trascrizione.json")
     # Compaiono le parole che cadono nei segmenti del piano (anche se modificato a mano), tranne
     # gli intercalari. Le frasi ripetute sono già fuori dai segmenti.
@@ -124,7 +129,7 @@ def main():
         segna_intercalari(s["parole"], not pp.get("intercalari", True))
 
     parole = parole_sulla_timeline(piano, trascr)
-    scrivi_json(c["lavoro"] / "parole-timeline.json", {"fps": piano["fps"], "parole": parole})
+    scrivi_json(P["parole"], {"fps": piano["fps"], "parole": parole})
 
     W, H = piano["larghezza"], piano["altezza"]
     verticale = H > W
@@ -137,7 +142,7 @@ def main():
     for i, b in enumerate(blocchi, 1):
         testo = "\n".join(a_righe([w["w"] for w in b], max_car))
         srt.append(f"{i}\n{ts_srt(b[0]['inizio'])} --> {ts_srt(b[-1]['fine'])}\n{testo}\n")
-    (c["lavoro"] / "sottotitoli.srt").write_text("\n".join(srt), encoding="utf-8")
+    P["srt"].write_text("\n".join(srt), encoding="utf-8")
 
     margine_v = int(H * (1 - pos))
     ass = [
@@ -161,8 +166,8 @@ def main():
         else:
             testo = "\\N".join(up(r) for r in a_righe([w["w"] for w in b], max_car))
             ass.append(f"Dialogue: 0,{ts_ass(b[0]['inizio'])},{ts_ass(b[-1]['fine'])},Base,,0,0,0,,{testo}")
-    (c["lavoro"] / "sottotitoli.ass").write_text("\n".join(ass) + "\n", encoding="utf-8")
-    info(f"{len(parole)} parole, {len(blocchi)} sottotitoli. File: sottotitoli.srt, sottotitoli.ass, parole-timeline.json")
+    P["ass"].write_text("\n".join(ass) + "\n", encoding="utf-8")
+    info(f"{len(parole)} parole, {len(blocchi)} sottotitoli. File in {P['srt'].parent}: {P['srt'].name}, {P['ass'].name}, {P['parole'].name}")
 
 
 if __name__ == "__main__":
