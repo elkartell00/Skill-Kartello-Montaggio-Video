@@ -41,6 +41,31 @@ def parole_sulla_timeline(piano, trascr):
     return out
 
 
+def applica_sostituzioni(parole, sostituzioni):
+    """Correzioni del testo (errori di trascrizione): [{"da": "testo sbagliato", "a": "testo giusto"}].
+
+    La sequenza di parole "da" viene sostituita ovunque da "a"; i tempi vengono distribuiti sulle nuove parole.
+    """
+    from pulizia import norm
+    for s in sostituzioni:
+        da = [norm(w) for w in s["da"].split()]
+        nuove = s["a"].split()
+        if not da:
+            continue
+        i = 0
+        while i <= len(parole) - len(da):
+            if [norm(p["w"]) for p in parole[i:i + len(da)]] == da:
+                t0, t1 = parole[i]["inizio"], parole[i + len(da) - 1]["fine"]
+                passo = (t1 - t0) / max(1, len(nuove))
+                rimp = [{"w": w, "inizio": round(t0 + k * passo, 3), "fine": round(t0 + (k + 1) * passo, 3),
+                         "segmento": parole[i].get("segmento")} for k, w in enumerate(nuove)]
+                parole[i:i + len(da)] = rimp
+                i += len(rimp)
+            else:
+                i += 1
+    return parole
+
+
 def blocchi_frase(parole, max_car, max_righe):
     blocchi, cur = [], []
     def lung(ws):
@@ -128,7 +153,7 @@ def main():
     for s in trascr["sorgenti"]:
         segna_intercalari(s["parole"], not pp.get("intercalari", True))
 
-    parole = parole_sulla_timeline(piano, trascr)
+    parole = applica_sostituzioni(parole_sulla_timeline(piano, trascr), piano.get("sostituzioni") or [])
     scrivi_json(P["parole"], {"fps": piano["fps"], "parole": parole})
 
     W, H = piano["larghezza"], piano["altezza"]

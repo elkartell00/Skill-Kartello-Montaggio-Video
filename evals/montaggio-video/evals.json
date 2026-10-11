@@ -1,0 +1,24 @@
+{
+  "skill_name": "montaggio-video",
+  "nota": "Casi di prova per skill-creator, da far girare sul Mac con riprese vere in montaggio-video/da-montare/.",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Ho messo in montaggio-video/da-montare/prova-tavolo il video di oggi girato con l'iPhone (sono io che spiego come scegliere il legno per un tavolo). Montamelo per il profilo base, versione lunga: togli pause, ehm e frasi ripetute, metti i sottotitoli e fammi vedere l'anteprima.",
+      "expected_output": "Analisi con riconoscimento HDR e confronto dei 3 operatori proposto all'utente; trascrizione; piano video-lungo con tagli motivati; sottotitoli srt; anteprima in risultati/prova-tavolo/video-lungo/v01 con controllo finale superato; riepilogo in italiano.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Dal video lungo di prova-tavolo ricavami 2 shorts verticali con i sottotitoli grandi parola per parola e un aggancio forte all'inizio. Proponimi prima i momenti.",
+      "expected_output": "Tabella di momenti candidati con aggancio proposto, attesa della scelta; piani short-1 e short-2 con --intervalli; riinquadratura 9:16 con anteprima delle inquadrature; sottotitoli stile parole; anteprime controllate.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Crea un profilo per il mio canale di falegnameria: video lunghi e shorts, colori presi dal logo che ho messo in brand/, e analizza i video di riferimento che ho messo nella cartella riferimenti.",
+      "expected_output": "Profilo creato da base con profili.py; proposta di stile (consigliato + 2 alternative) e palette dal logo con scelta all'utente; analisi dei video di riferimento con video_riferimento.py e regole scritte nei file dei formati; salvataggio datato del profilo.",
+      "files": []
+    }
+  ]
+}

@@ -75,6 +75,10 @@ def controlla(root):
         "python_venv": str(py),
         "numpy": modulo_in(py, "numpy"),
         "whisper": modulo_in(py, backend_whisper()),
+        "opencv": modulo_in(py, "cv2"),
+        "git": shutil.which("git") is not None,
+        "grafiche": (root / ".strumenti" / "grafiche" / "node_modules" / "remotion").exists(),
+        "separazione": modulo_in(py, "transformers"),
         "backend_whisper": backend_whisper(),
     }
     return stato
@@ -93,6 +97,10 @@ def stampa(stato):
     print(f"- Ambiente Python della skill: {ok(stato['venv'])}  ({stato['python_venv']})")
     print(f"  - numpy: {ok(stato['numpy'])}")
     print(f"  - Whisper ({stato['backend_whisper']}): {ok(stato['whisper'])}")
+    print(f"  - OpenCV (riinquadratura): {ok(stato['opencv'])}")
+    print(f"- git (storico dei profili): {ok(stato['git'])}")
+    print(f"- Grafiche (Remotion e motore di animazione): {ok(stato['grafiche'])}  -> grafiche.py prepara")
+    print(f"- Separazione del soggetto (facoltativa, ~2 GB): {ok(stato['separazione'])}  -> separa_soggetto.py prepara")
 
     consigli = []
     if not stato["ffmpeg"] or not stato["ffprobe"]:
@@ -101,7 +109,7 @@ def stampa(stato):
         consigli.append("Il tuo FFmpeg non ha i filtri per convertire l'HDR (zscale/tonemap). Su Mac: `brew reinstall ffmpeg`.")
     if not stato["node"]:
         consigli.append("Installa Node.js (serve dalla tappa delle grafiche): su Mac `brew install node`.")
-    if not (stato["venv"] and stato["numpy"] and stato["whisper"]):
+    if not (stato["venv"] and stato["numpy"] and stato["whisper"] and stato["opencv"]):
         consigli.append("Manca l'ambiente Python con Whisper: rilancia questo script con --installa (chiedi prima all'utente).")
     if consigli:
         print("\nDa fare:")

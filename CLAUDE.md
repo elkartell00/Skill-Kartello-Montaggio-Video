@@ -11,6 +11,9 @@ Questa repository è un marketplace di plugin per Claude Code. Contiene il plugi
 - Gli script vanno in `scripts/` dentro la cartella della skill e si richiamano con `${CLAUDE_SKILL_DIR}/scripts/...`.
 - Il nome del plugin in `.claude-plugin/marketplace.json` e in `plugins/montaggio-video/.claude-plugin/plugin.json` deve restare identico.
 - Quando cambi una skill già pubblicata, alza `version` in `plugin.json`, altrimenti chi l'ha installata non riceve l'aggiornamento.
+- La skill `montaggio-video` è in italiano (istruzioni, messaggi degli script, interfacce). Ogni modifica va annotata in `CHANGELOG.md`; per integrare altre skill segui `riferimenti/integrare-skill.md`.
+- Gli script non devono mai modificare le riprese originali né partire da un video già esportato; ogni esportazione passa dal controllo finale.
+- Gli script lavorano su Mac (piattaforma principale) e restano portabili: Python e Node, niente bash obbligatorio, niente comandi di shell costruiti con testo variabile.
 
 ## Verifica
 

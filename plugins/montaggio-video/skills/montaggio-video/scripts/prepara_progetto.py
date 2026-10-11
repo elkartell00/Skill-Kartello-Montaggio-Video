@@ -8,7 +8,8 @@ Crea (se manca) dentro la cartella da cui è stata avviata la skill:
   montaggio-video/
     profili/base/              copiato dalla skill al primo avvio
     da-montare/<progetto>/     qui l'utente mette le riprese (mai modificate)
-    risultati/<progetto>/      v01, v02, ... una cartella per ogni versione
+    media/<progetto>/          grafiche, B-roll, musica ed effetti del progetto
+    risultati/<progetto>/      <piano>/v01, v02, ... una cartella per ogni versione
     .lavoro/<progetto>/        file intermedi (trascrizione, piano di montaggio, segmenti)
 
 Le riprese possono stare anche altrove: con --video si registrano i percorsi senza copiarle.
@@ -31,14 +32,15 @@ def prepara_root(root):
     if not base_dest.exists():
         shutil.copytree(SKILL_DIR / "profili" / "base", base_dest)
         info(f"Creato il profilo base in {base_dest}")
-    for d in ("da-montare", "risultati", ".lavoro"):
+    for d in ("da-montare", "risultati", "media", ".lavoro"):
         (root / d).mkdir(exist_ok=True)
     leggimi = root / "LEGGIMI.txt"
     if not leggimi.exists():
         leggimi.write_text(
             "Cartella di lavoro della skill montaggio-video.\n\n"
             "da-montare/<progetto>/  metti qui le riprese: non vengono mai modificate\n"
-            "risultati/<progetto>/   una cartella per ogni versione (v01, v02, ...)\n"
+            "risultati/<progetto>/   per ogni montaggio (video-lungo, short-1...) una cartella per versione (v01, v02...)\n"
+            "media/<progetto>/       grafiche, B-roll generati, musica ed effetti: non cancellarli finché servono\n"
             "profili/                i profili di stile, con il diario delle revisioni\n"
             ".lavoro/                file intermedi: si possono cancellare a lavoro finito\n",
             encoding="utf-8")
@@ -57,6 +59,7 @@ def main():
     prepara_root(c["root"])
     for k in ("da_montare", "lavoro", "risultati"):
         c[k].mkdir(parents=True, exist_ok=True)
+    (c["root"] / "media" / a.progetto).mkdir(parents=True, exist_ok=True)
 
     formati = [f.strip() for f in a.formati.split(",") if f.strip()]
     for f in formati:

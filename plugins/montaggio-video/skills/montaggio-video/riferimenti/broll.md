@@ -5,11 +5,15 @@ Il B-roll copre il parlato con immagini che mostrano ciò di cui si sta parlando
 
 1. **Le riprese extra dell'utente** (dettagli, lavorazioni, timelapse, prodotti): sono vere e sue, quindi
    sempre la prima scelta.
-2. **Contenuti generati con Studio AI** (vedi [studio-ai.md](studio-ai.md)), quando manca una ripresa
-   vera e l'idea si può mostrare senza ingannare (un concetto, un'atmosfera, un dettaglio generico).
+2. **Creato con il codice da te**: B-roll animato con il motore di motion-broll (processi, confronti,
+   numeri, interfacce, [broll-animato.md](broll-animato.md)), grafiche Remotion pronte o **su misura**
+   scritte per quel punto (schemi, grafici, mappe, liste, prima/dopo, citazioni, illustrazioni con forme e
+   icone, testi cinetici, [grafiche.md](grafiche.md#grafiche-su-misura)). Provaci in ogni modo prima di
+   passare oltre: è la regola dell'utente.
 3. **Archivi gratuiti** (Pexels, Pixabay), solo se il profilo li prevede.
-4. **B-roll animato** con il motore di motion-broll per processi, confronti, numeri e interfacce
-   ([broll-animato.md](broll-animato.md)).
+4. **Studio AI**, ultima risorsa (vedi [studio-ai.md](studio-ai.md)): solo quando con il codice non si
+   arriva (una scena realistica, un ambiente, un oggetto fotografico che nessuna ripresa mostra) e l'idea
+   si può mostrare senza ingannare. Prima mostra il costo e aspetta il sì.
 
 ## Flusso
 
@@ -22,11 +26,12 @@ Il B-roll copre il parlato con immagini che mostrano ciò di cui si sta parlando
    le frasi che descrivono qualcosa da vedere. Non coprire: aggancio iniziale, frasi personali o
    emotive, momenti in cui conta l'espressione del volto. Ogni B-roll 2–6 s, sulla frase che lo nomina.
 3. **Proposta all'utente**, prima di generare o scaricare: una tabella
-   `| # | Entra–Esce | Frase | Cosa mostra | Fonte (propria / Studio AI / archivio / animato) | Costo |`
+   `| # | Entra–Esce | Frase | Cosa mostra | Fonte (propria / codice / archivio / Studio AI) | Costo |`
    con il **costo totale stimato** dei contenuti AI. Aspetta il sì.
 4. **Prepara i file** in `montaggio-video/media/<progetto>/broll/`:
    - proprie: usale direttamente dal percorso originale (non copiarle); `inizio_file` sceglie il tratto;
-   - Studio AI: un solo `genera_lotto` con tutte le clip (vedi studio-ai.md); mentre Veo lavora prepara il resto;
+   - codice: render con `grafiche.py` (Remotion) o con il motore di animazione;
+   - Studio AI (solo ciò che il codice non può fare): un solo `genera_lotto` (vedi studio-ai.md); mentre Veo lavora prepara il resto;
    - archivi: `broll.py archivi --cerca "..." --orientamento orizzontale|verticale` (serve la chiave dell'utente).
 5. **Nel piano:** una sovrapposizione per B-roll, `modo: "pieno"` (o `riquadro` per un dettaglio in
    un angolo), `dissolvenza: 0.1–0.2` se il profilo la vuole, altrimenti taglio netto.

@@ -2,7 +2,8 @@
 
 uso:
   python grafiche.py prepara                                   # prima volta (e dopo un aggiornamento della skill)
-  python grafiche.py remotion <Tipo> <props.json> <uscita.mov> # Titolo, Scritta, Freccia, Emoji, Barra, Sottotitoli
+  python grafiche.py remotion <Tipo> <props.json> <uscita.mov> # Titolo, Scritta, Freccia, Emoji, Barra, Sottotitoli o su misura
+  python grafiche.py immagine <Tipo> <props.json> <uscita.png> [--secondo 1.5]   # immagine ferma (miniature, schede)
   python grafiche.py anima build <cartella_dist> <clip.html ...>
   python grafiche.py anima fogli <dist/clip.html> <foglio.png> t1 t2 ...
   python grafiche.py anima render <dist/clip.html> <uscita.mp4|mov> <fps>
@@ -44,9 +45,20 @@ def prepara():
     # Sorgenti sempre aggiornati dalla skill; node_modules resta.
     for nome in ("package.json", "tsconfig.json"):
         shutil.copy2(src / nome, dest / nome)
+    # Sorgenti della skill aggiornati; la cartella su-misura/ (grafiche create nei progetti) resta com'è.
+    su_misura = dest / "src" / "su-misura"
+    salvata = None
+    if su_misura.exists():
+        salvata = dest / ".su-misura-tmp"
+        if salvata.exists():
+            shutil.rmtree(salvata)
+        shutil.move(str(su_misura), str(salvata))
     if (dest / "src").exists():
         shutil.rmtree(dest / "src")
     shutil.copytree(src / "src", dest / "src")
+    if salvata:
+        shutil.rmtree(dest / "src" / "su-misura")
+        shutil.move(str(salvata), str(su_misura))
     fonts = dest / "public" / "fonts"
     fonts.mkdir(parents=True, exist_ok=True)
     for f in (SKILL_DIR / "assets" / "fonts").glob("*.ttf"):
@@ -95,6 +107,22 @@ def remotion(tipo, props, uscita):
     info(f"Creata {uscita}")
 
 
+def immagine(tipo, props, uscita, secondo=None):
+    d = controlla()
+    props = Path(props).resolve()
+    dati = json.loads(props.read_text(encoding="utf-8"))
+    uscita = Path(uscita).resolve()
+    uscita.parent.mkdir(parents=True, exist_ok=True)
+    fotogramma = int(round(float(secondo if secondo is not None else max(0.0, dati.get("durata", 1) - 0.1)) * float(dati.get("fps", 30))))
+    cmd = [shutil.which("npx") or "npx", "remotion", "still", "src/index.ts", tipo, str(uscita), f"--props={props}", f"--frame={fotogramma}"]
+    if os.environ.get("MONTAGGIO_REMOTION_BROWSER"):
+        cmd += [f"--browser-executable={os.environ['MONTAGGIO_REMOTION_BROWSER']}"]
+    r = subprocess.run(cmd, cwd=d, capture_output=True, text=True)
+    if r.returncode != 0:
+        errore(f"immagine {tipo} non riuscita:\n" + "\n".join((r.stderr or r.stdout).strip().splitlines()[-12:]))
+    info(f"Creata {uscita}")
+
+
 def anima(azione, args):
     d = controlla()
     motore = SKILL_DIR / "motore-animazioni"
@@ -121,6 +149,9 @@ def main():
         prepara()
     elif cmd == "remotion" and len(args) == 3:
         remotion(*args)
+    elif cmd == "immagine" and len(args) in (3, 5):
+        sec = float(args[4]) if len(args) == 5 and args[3] == "--secondo" else None
+        immagine(args[0], args[1], args[2], sec)
     elif cmd == "anima" and args:
         anima(args[0], args[1:])
     else:

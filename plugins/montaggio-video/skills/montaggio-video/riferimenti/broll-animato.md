@@ -22,7 +22,7 @@ pagina autonoma), `render.js` (render con motion blur), `beats.js` (fogli di fot
    ```bash
    $PY $SKILL/scripts/grafiche.py anima build montaggio-video/media/<progetto>/animazioni/dist montaggio-video/media/<progetto>/animazioni/*.html
    ```
-   Ogni cambio di stato sulla sua parola: tempo nella clip = tempo della parola (da `parole-timeline.json`) − entrata della clip.
+   Ogni cambio di stato sulla sua parola: tempo nella clip = tempo della parola (da `sottotitoli/<piano>-parole.json`) − entrata della clip.
 5. **Controlla i fotogrammi** sui momenti chiave e a metà trasformazione:
    ```bash
    $PY $SKILL/scripts/grafiche.py anima fogli <dist/NN-nome.html> <foglio.png> 0.4 1.2 2.1 ...

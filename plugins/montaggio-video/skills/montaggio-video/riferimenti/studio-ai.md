@@ -1,7 +1,14 @@
 # Studio AI
 
 Studio AI è l'app locale dell'utente che genera immagini, video e audio (Google Nano Banana e Veo 3.1,
-OpenAI GPT Image, ElevenLabs). Si usa **solo** con gli strumenti MCP del server `studio-ai`: mai
+OpenAI GPT Image, ElevenLabs).
+
+**Per immagini e video è l'ultima risorsa.** Regola dell'utente: tutto ciò che si può creare con il codice
+(motion graphics, animazioni, schede, grafici, illustrazioni con forme e icone, testi animati, miniature
+con testo e grafica) lo crea Claude Code con Remotion, il motore di animazione o grafiche su misura, e ci
+prova in ogni modo. Studio AI si usa solo quando con il codice non si arriva: scene realistiche,
+ambienti, persone o oggetti fotografici che nessuna ripresa mostra. Per l'audio la priorità è in
+[audio.md](audio.md). Si usa **solo** con gli strumenti MCP del server `studio-ai`: mai
 chiamare direttamente le API di Google, OpenAI o ElevenLabs, mai chiedere chiavi (stanno nell'app).
 Il catalogo completo dell'app fa fede; qui c'è solo ciò che serve al montaggio. Prezzi e modelli
 cambiano: in caso di dubbio usa `elenco_modelli` e `stima_costo`.
@@ -43,9 +50,10 @@ cancellarli finché servono. In `contesto.progetto` metti il nome del progetto.
 
 ## Immagini
 
-`genera_immagine` per miniature (`preset: "miniatura-youtube"`), copertine (`copertina-short`), sfondi o
-elementi grafici (`sfondo_trasparente: true` per PNG da sovrapporre). Testi da scrivere nell'immagine tra
-virgolette nel prompt.
+Prima prova con il codice: miniature, copertine, schede ed elementi grafici si fanno con
+`grafiche.py immagine` (Remotion, anche su misura), usando fotogrammi delle riprese come sfondo. Solo se
+serve un'immagine realistica che il codice non può fare: `genera_immagine` (`preset: "miniatura-youtube"`,
+`copertina-short`, `sfondo_trasparente: true` per PNG da sovrapporre; testi tra virgolette nel prompt).
 
 ## Audio
 

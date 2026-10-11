@@ -8,7 +8,7 @@
 | shorts-dal-lungo | MP4 9:16, 1080x1920 | come la ripresa | bruciati |
 | shorts-indipendenti | MP4 9:16, 1080x1920 | come la ripresa | bruciati |
 | reels | MP4 9:16, 1080x1920 | come la ripresa | bruciati, più in alto |
-| su richiesta | `--formato LARGHEZZAxALTEZZA` in `pulizia.py` (es. 1080x1080) | come la ripresa | a scelta |
+| su richiesta | `--formato LARGHEZZAxALTEZZA` in `pulizia.py` (es. 1080x1080, 1080x1350) | come la ripresa | a scelta |
 
 - **Anteprima:** lato corto 540 px, codifica veloce, sottotitoli sempre visibili. Serve solo a guardare.
 - **Audio:** AAC 320 kbps, 48 kHz, volume medio -14 LUFS, picchi sotto -1,5 dBTP (valori adatti a
@@ -60,7 +60,27 @@ indicazione diversa (`pulizia.py --fps`).
 durata attesa, sincronia audio/video (differenza sotto 0,1 s), volume medio (±1 LUFS) e picchi. Il
 risultato è in `<video>.controllo.json`. Un controllo fallito va sistemato prima di consegnare.
 
+## Dove finiscono i file
+
+`risultati/<progetto>/<piano>/vNN/`: `anteprima.mp4`, `<progetto>-<piano>-vNN.mp4` (finale),
+`sottotitoli.srt`/`.ass`, `piano.json` (il piano usato: per tornare indietro), `riepilogo-tagli.md`,
+`*.controllo.json`, pagine di revisione e cartella `davinci/`. Ogni anteprima crea una nuova versione;
+l'export finale va nella versione più recente se il piano non è cambiato.
+
 ## Progetto per DaVinci Resolve
 
-In costruzione (tappa 6): progetto collegato agli originali, con grafiche e scritte come clip separate
-a sfondo trasparente e sottotitoli come file a parte.
+```bash
+$PY $SKILL/scripts/davinci.py --progetto <nome> --piano <piano> [--versione vNN]
+```
+
+Crea `vNN/davinci/` con:
+- `<progetto>-<piano>-vNN.fcpxml` (FCPXML 1.9): i segmenti collegati alle **riprese originali** sulla
+  traccia principale, grafiche, animazioni e B-roll come clip separate sulle tracce sopra (le grafiche
+  sono `.mov` trasparenti a piena risoluzione), musica ed effetti sonori sulle tracce audio con il loro volume;
+- `sottotitoli.srt` da importare a parte;
+- `LEGGIMI.txt` con i passi di importazione.
+
+Velocità, zoom, tremolio, transizioni, look colore e riinquadratura non passano in modo affidabile
+nell'FCPXML: diventano **marcatori** sui clip con l'istruzione, da rifare in DaVinci in pochi clic. Le
+riprese HDR vanno gestite con il Color Management di DaVinci (spiegato nel LEGGIMI). Esportando da DaVinci
+si parte dagli originali: una sola codifica, nessuna perdita di qualità.

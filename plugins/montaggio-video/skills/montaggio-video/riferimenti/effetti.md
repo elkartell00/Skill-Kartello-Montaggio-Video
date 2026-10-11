@@ -6,7 +6,7 @@ Se il profilo non dice niente, usali con misura e chiedi all'utente se ne vuole 
 
 | Effetto | Dove si imposta | Uso tipico | Note |
 |---|---|---|---|
-| Zoom a scatto (punch-in) | segmento `zoom: {"tipo": "scatto", "a": 1.15–1.3, "inizio": s}` | enfasi su una parola, battuta, cambio di frase senza taglio | sulla parola esatta (tempo da `parole-timeline.json` meno inizio del segmento sulla timeline) |
+| Zoom a scatto (punch-in) | segmento `zoom: {"tipo": "scatto", "a": 1.15–1.3, "inizio": s}` | enfasi su una parola, battuta, cambio di frase senza taglio | sulla parola esatta (tempo da `sottotitoli/<piano>-parole.json` meno inizio del segmento sulla timeline) |
 | Zoom lento | segmento `zoom: {"tipo": "lento", "da": 1.0, "a": 1.08–1.15, "durata": s}` | tenere viva un'inquadratura lunga | con `cx`/`cy` si zooma verso un punto (il viso, il prodotto) |
 | Tremolio di camera | segmento `tremolio: {"intensita": 0.005–0.015}` | energia, impatto, scene d'azione | breve: 1–3 s |
 | Accelerazione / rallentamento | segmento `velocita` | accelerare una lavorazione, rallentare un dettaglio | sotto 0.5 servono riprese a 60/120 fps per restare fluidi |

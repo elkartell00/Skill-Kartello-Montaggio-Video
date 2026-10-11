@@ -36,7 +36,7 @@ Dimensioni del testo in frazioni dell'altezza (0.06 = 6%); posizioni in frazioni
 | `Freccia` | `da: [x, y]`, `a: [x, y]`, `curva` (-1..1), `spessore`, `colore` |
 | `Emoji` | `emoji`, `x`, `y`, `dimensione`, `dondola` |
 | `Barra` | `posizione` (alto/basso), `spessore`, `colore`, `fondo`: barra di avanzamento per tutta la durata |
-| `Sottotitoli` | `parole` (da `parole-timeline.json`), `parolePerBlocco`, `maiuscolo`, `y`, `dimensione`, `animazione` (pop/nessuna), `coloreTesto` |
+| `Sottotitoli` | `parole` (da `.lavoro/<progetto>/sottotitoli/<piano>-parole.json`), `parolePerBlocco`, `maiuscolo`, `y`, `dimensione`, `animazione` (pop/nessuna), `coloreTesto` |
 
 Il render di una grafica breve richiede da qualche secondo a un minuto. Controlla sempre un fotogramma
 (sovrapposto a un fotogramma del video) prima di metterla nel piano.
@@ -50,6 +50,29 @@ Il render di una grafica breve richiede da qualche secondo a un minuto. Controll
   durata e si esporta con `--sottotitoli no` per non averli doppi.
 
 Proponi all'utente l'opzione adatta e salva la scelta nel profilo.
+
+## Grafiche su misura
+
+Quando i componenti pronti non bastano, **scrivi tu la grafica in Remotion**: è la prima scelta per ogni
+motion graphic, prima di pensare a Studio AI. Esempi: grafico a barre o a linee che cresce, schema di un
+processo, mappa con un percorso, elenco che si costruisce, prima/dopo, contatore (con numeri veri dati
+dall'utente), citazione in grande, testo cinetico, illustrazione fatta di forme e icone, intro e chiusura
+del canale con il logo, miniature.
+
+1. Crea il componente in `montaggio-video/.strumenti/grafiche/src/su-misura/<Nome>.tsx` (React + Remotion,
+   funzione del fotogramma: `useCurrentFrame`, `interpolate`, `spring`; usa `Base`, `stile`, `entra`,
+   `esce`, `ombraTesto` da `../comune`, così colori e font seguono il profilo).
+2. Registralo in `su-misura/index.tsx` (`SU_MISURA`: id, componente, proprietà di esempio).
+3. Render come per gli altri tipi: `grafiche.py remotion <Nome> props.json uscita.mov`; per un'immagine
+   ferma `grafiche.py immagine <Nome> props.json uscita.png [--secondo 1.5]`.
+4. Controlla un fotogramma sovrapposto al video, correggi, poi mettilo nel piano.
+
+La cartella `su-misura/` non viene toccata quando la skill si aggiorna (`grafiche.py prepara`): le
+grafiche create restano e si riusano nei video successivi. Se una grafica diventa ricorrente per un
+profilo (intro, chiusura, stile delle schede), annotalo nel profilo.
+
+Per immagini da sovrapporre o di sfondo puoi usare anche fotogrammi delle riprese (`ffmpeg -ss <t> -i
+<ripresa> -frames:v 1`) dentro una grafica Remotion (`staticFile` da `public/`, o percorso assoluto con `file://`).
 
 ## Stile e colori
 

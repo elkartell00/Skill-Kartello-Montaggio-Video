@@ -9,12 +9,17 @@ Tutto sta in `montaggio-video/`, dentro la cartella da cui è stata avviata la s
 
 ```text
 montaggio-video/
-  profili/<profilo>/          profilo.md, un file per formato, diario-revisioni.md
-  da-montare/<progetto>/      le riprese: si leggono e basta, mai modificate, spostate o rinominate
-  risultati/<progetto>/vNN/   una cartella per versione: anteprima, video finale, sottotitoli,
-                              piano usato, controllo
-  .lavoro/<progetto>/         analisi, audio per Whisper, trascrizione, piano, segmenti già codificati
-  .strumenti/venv/            ambiente Python della skill
+  profili/<profilo>/              profilo.md, un file per formato, diario delle revisioni, brand/, riferimenti/
+  da-montare/<progetto>/          le riprese: si leggono e basta, mai modificate, spostate o rinominate
+    broll/                        riprese extra (dettagli, lavorazioni, timelapse, prodotti)
+  media/<progetto>/               grafiche, animazioni, B-roll generati, musica ed effetti del progetto
+  risultati/<progetto>/<piano>/   un montaggio (video-lungo, short-1, reel-1...):
+    vNN/                          una cartella per versione: anteprima, video finale, sottotitoli, piano usato,
+                                  controllo, pagine di revisione, progetto DaVinci
+    reel.json                     per il player di revisione scena per scena
+  .lavoro/<progetto>/             analisi, audio per Whisper, trascrizione, piani/, sottotitoli/, segmenti già
+                                  codificati, separazione del soggetto
+  .strumenti/                     ambiente Python (venv) e strumenti per le grafiche
 ```
 
 - Le riprese possono stare anche altrove: `prepara_progetto.py --video` registra il percorso senza copiare.
@@ -37,11 +42,12 @@ montaggio-video/
 
 ## Piano di montaggio
 
-`piano-montaggio.json` è la fonte di verità del montaggio: segmenti (ripresa, inizio, fine, testo),
-tagli con il motivo, e, dalle tappe successive, sovrapposizioni (grafiche, B-roll, testi) e audio.
+Il piano (`.lavoro/<progetto>/piani/<piano>.json`) è la fonte di verità del montaggio: segmenti (ripresa,
+inizio, fine, testo, effetti), tagli con il motivo, sovrapposizioni (grafiche, B-roll, testi), audio,
+correzioni dei sottotitoli. Formato completo in [piano.md](piano.md).
 - È leggibile e modificabile: per una revisione si cambia il piano e si riesporta.
 - I tempi dei segmenti sono nel tempo della ripresa originale; quelli delle sovrapposizioni nel tempo
-  della timeline montata (`parole-timeline.json` dà i tempi delle parole sulla timeline).
+  della timeline montata (`sottotitoli/<piano>-parole.json` dà i tempi delle parole sulla timeline).
 - Ogni versione in `risultati/` contiene una copia del piano usato: si può tornare indietro.
 
 ## Revisioni

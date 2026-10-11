@@ -338,9 +338,11 @@ def grafo_audio(audio, base, primo_indice, durata):
         mix.append(f"[e{k}]")
         idx += 1
     if len(mix) > 1:
-        filtri.append(f"{''.join(mix)}amix=inputs={len(mix)}:duration=first:normalize=0[amix]")
+        # duration=longest + taglio esatto: con duration=first il mixer chiudeva appena finiva la voce, perdendo
+        # gli ultimi campioni ancora in viaggio nella compressione della musica (audio più corto del video).
+        filtri.append(f"{''.join(mix)}amix=inputs={len(mix)}:duration=longest:normalize=0,apad,atrim=0:{durata:.6f}[amix]")
     else:
-        filtri.append(f"{voce}anull[amix]")
+        filtri.append(f"{voce}apad,atrim=0:{durata:.6f}[amix]")
     return ingressi, filtri
 
 
@@ -489,10 +491,13 @@ def main():
            "-map", "[aout]", "-c:a", "aac", "-b:a", "320k" if a.modo == "finale" else "160k",
            "-t", f"{durata_tot:.6f}", "-movflags", "+faststart", str(out)]
     info("Unione, grafiche e audio ...")
+    if os.environ.get("MONTAGGIO_DEBUG"):
+        (vdir / ".comando.json").write_text(json.dumps({"cmd": cmd, "cwd": str(cwd) if cwd else None}), encoding="utf-8")
     r = subprocess.run(cmd, capture_output=True, text=True, cwd=cwd)
     if r.returncode != 0:
         errore("unione finale non riuscita:\n" + "\n".join(r.stderr.strip().splitlines()[-15:]))
-    lista.unlink(missing_ok=True)
+    if not os.environ.get("MONTAGGIO_DEBUG"):
+        lista.unlink(missing_ok=True)
 
     for f, dest in ((P["srt"], "sottotitoli.srt"), (P["ass"], "sottotitoli.ass"), (P["riepilogo"], "riepilogo-tagli.md")):
         if f.exists():

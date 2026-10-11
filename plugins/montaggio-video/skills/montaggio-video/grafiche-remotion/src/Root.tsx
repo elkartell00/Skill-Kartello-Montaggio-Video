@@ -2,6 +2,7 @@ import React from 'react';
 import {CalculateMetadataFunction, Composition} from 'remotion';
 import {Barra, Emoji, Freccia, Scritta, Sottotitoli, Titolo} from './grafiche';
 import {Base} from './comune';
+import {SU_MISURA} from './su-misura';
 
 // Dimensioni, fps e durata arrivano dalle proprietà (--props), così ogni grafica nasce già della
 // misura del video in cui va: 3840x2160 per il video lungo, 1080x1920 per shorts e reels.
@@ -28,5 +29,9 @@ export const Root: React.FC = () => (
       defaultProps={{...BASE, posizione: 'basso'}} />
     <Composition id="Sottotitoli" component={Sottotitoli as any} calculateMetadata={metadati as any} durationInFrames={90} fps={30} width={1080} height={1920}
       defaultProps={{...BASE, larghezza: 1080, altezza: 1920, parole: [{w: 'Prova', inizio: 0.1, fine: 0.5}, {w: 'dei', inizio: 0.5, fine: 0.7}, {w: 'sottotitoli', inizio: 0.7, fine: 1.4}]}} />
+    {SU_MISURA.map((g) => (
+      <Composition key={g.id} id={g.id} component={g.component as any} calculateMetadata={metadati as any}
+        durationInFrames={90} fps={30} width={1920} height={1080} defaultProps={{...BASE, ...g.defaultProps}} />
+    ))}
   </>
 );

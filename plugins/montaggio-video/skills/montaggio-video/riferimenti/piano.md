@@ -1,13 +1,13 @@
 # Il piano di montaggio
 
-`.lavoro/<progetto>/piano-montaggio.json` descrive tutto il montaggio. `pulizia.py` crea la base
+`.lavoro/<progetto>/piani/<piano>.json` descrive un montaggio (video-lungo, short-1...). `pulizia.py` crea la base
 (segmenti e tagli); tu aggiungi effetti, transizioni, sovrapposizioni e audio; `esporta.py` lo esegue
 sempre dagli originali. Ogni versione in `risultati/` ne conserva una copia.
 
 **Tempi:**
 - `inizio`/`fine` dei **segmenti** sono nel tempo della **ripresa originale**;
 - `inizio`/`fine` di **sovrapposizioni, musica ed effetti sonori** sono nel tempo della **timeline
-  montata**. Le parole sulla timeline sono in `parole-timeline.json`: usale per mettere ogni elemento
+  montata**. Le parole sulla timeline sono in `.lavoro/<progetto>/sottotitoli/<piano>-parole.json`: usale per mettere ogni elemento
   sulla parola giusta. Se cambi i segmenti, rigenera `sottotitoli.py` e ricontrolla i tempi.
 
 **Percorsi:** relativi alla cartella `montaggio-video/` (es. `media/<progetto>/titolo-01.mov`) oppure
@@ -31,8 +31,10 @@ assoluti.
      "transizione": {"tipo": "dissolvenza", "durata": 0.4}}
   ],
   "tagli": [{"sorgente": 0, "inizio": 4.2, "fine": 5.1, "motivo": "pausa", "testo": ""}],
+  "sostituzioni": [{"da": "tavolo di rovare", "a": "tavolo di rovere"}],
   "sovrapposizioni": [
-    {"file": "media/tavolo-rovere/titolo-01.mov", "inizio": 0.3, "fine": 3.0, "modo": "sopra", "nota": "titolo iniziale"},
+    {"file": "media/tavolo-rovere/titolo-01.mov", "inizio": 0.3, "fine": 3.0, "modo": "sopra", "nota": "titolo iniziale",
+     "remotion": {"tipo": "Titolo", "props": "media/tavolo-rovere/titolo-01.json"}},
     {"file": "media/tavolo-rovere/broll-sega.mp4", "inizio": 12.4, "fine": 16.0, "modo": "pieno", "inizio_file": 2.0, "dissolvenza": 0.2},
     {"file": "media/tavolo-rovere/pannello-02.mov", "inizio": 20.0, "fine": 35.0, "modo": "sopra", "livello": 1},
     {"file": "media/tavolo-rovere/prodotto.png", "inizio": 40.0, "fine": 44.0, "modo": "riquadro", "riquadro": [0.6, 0.1, 0.35, 0.35]}
@@ -76,6 +78,17 @@ di tempo, non tra una frase e l'altra. Il profilo dice quali usare e quanto.
 
 I B-roll HDR vengono convertiti con la stessa conversione della ripresa. L'audio dei B-roll non viene
 usato (la voce resta quella dell'originale): per un suono usa `audio.effetti`.
+
+## Correzioni del testo
+
+`sostituzioni`: errori di trascrizione da correggere nei sottotitoli (`da` -> `a`, anche più parole).
+Restano nel piano, quindi valgono per tutte le versioni successive.
+
+## Grafiche Remotion
+
+Per le grafiche Remotion aggiungi `remotion: {"tipo", "props"}` alla sovrapposizione: così il player di
+revisione mostra i testi della grafica come campi modificabili, e sai quale file di proprietà cambiare
+prima di rirenderizzarla.
 
 ## Audio
 
