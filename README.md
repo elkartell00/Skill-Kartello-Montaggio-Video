@@ -30,7 +30,9 @@ claude plugin install montaggio-video@kartello-montaggio-video
 
 Oppure dentro una sessione: `/plugin marketplace add elkartell00/Skill-Kartello-Montaggio-Video`, poi `/plugin install montaggio-video@kartello-montaggio-video`.
 
-Le skill si richiamano con `/montaggio-video:<nome-skill>`, oppure Claude le usa da solo quando la richiesta corrisponde alla loro `description`.
+La skill si richiama con `/montaggio-video:montaggio-video`, oppure Claude la usa da sola quando chiedi di montare un video ("monta questo video per [profilo], versione lunga più 3 shorts").
+
+Requisiti sul Mac: [Homebrew](https://brew.sh), poi `brew install ffmpeg node python`. Al primo utilizzo la skill controlla gli strumenti e, se gli dai il permesso, installa Whisper in un ambiente Python suo, dentro la cartella di lavoro `montaggio-video/`.
 
 ## Sviluppo
 
