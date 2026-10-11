@@ -51,6 +51,13 @@ Il render di una grafica breve richiede da qualche secondo a un minuto. Controll
 
 Proponi all'utente l'opzione adatta e salva la scelta nel profilo.
 
+## Stili imparati
+
+Prima di inventare una grafica nuova guarda la libreria degli stili (`montaggio-video/stili/INDICE.md`):
+ogni stile imparato da un esempio dell'utente è già un componente Remotion pronto da usare con i suoi
+colori ([stili.md](stili.md)). Gli stili si caricano nel progetto con `grafiche.py prepara` o
+`stili.py sincronizza`.
+
 ## Grafiche su misura
 
 Quando i componenti pronti non bastano, **scrivi tu la grafica in Remotion**: è la prima scelta per ogni

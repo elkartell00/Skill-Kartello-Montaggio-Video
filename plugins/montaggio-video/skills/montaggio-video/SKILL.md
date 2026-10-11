@@ -1,6 +1,6 @@
 ---
 name: montaggio-video
-description: Montatore video professionista che sostituisce CapCut. Monta in automatico le riprese grezze (iPhone 4K, anche HDR Dolby Vision) in video lunghi YouTube, Shorts e Reels con tagli di pause ed "ehm", frasi ripetute, sottotitoli parola per parola, B-roll (riprese proprie, Studio AI, grafiche animate), titoli e grafiche Remotion, zoom, transizioni, effetti, musica ed effetti sonori, esportazione sempre dagli originali e progetto DaVinci Resolve; poi corregge su indicazione dell'utente (anche scena per scena nel player di revisione) e impara il suo stile per profilo. Usala ogni volta che l'utente vuole montare, tagliare, sottotitolare, accorciare o rifinire un video, ricavare shorts o reels, creare o modificare un profilo di stile per un canale o cliente, rivedere una versione, o dice "monta questo video", "togli le pause", "fammi 3 shorts", "Revisione Motion OS per", anche se non dice la parola "montaggio".
+description: Montatore video professionista che sostituisce CapCut. Monta in automatico le riprese grezze (iPhone 4K, anche HDR Dolby Vision) in video lunghi YouTube, Shorts e Reels con tagli di pause ed "ehm", frasi ripetute, sottotitoli parola per parola, B-roll (riprese proprie, Studio AI, grafiche animate), titoli e grafiche Remotion, zoom, transizioni, effetti, musica ed effetti sonori, esportazione sempre dagli originali e progetto DaVinci Resolve; poi corregge su indicazione dell'utente (anche scena per scena nel player di revisione) e impara il suo stile per profilo e dagli esempi che le dà (rifà con il codice motion graphics ed effetti di altri video con i colori e il brand dell'utente, e li tiene in una libreria di stili). Usala ogni volta che l'utente vuole montare, tagliare, sottotitolare, accorciare o rifinire un video, ricavare shorts o reels, creare o modificare un profilo di stile per un canale o cliente, rivedere una versione, o dice "monta questo video", "togli le pause", "fammi 3 shorts", "impara questo stile", "voglio le grafiche come in questo video", "Revisione Motion OS per", anche se non dice la parola "montaggio".
 argument-hint: "[video o cartella] [profilo] [formati]"
 ---
 
@@ -23,6 +23,9 @@ non è un tecnico e anche suo padre usa la skill dal suo computer.
   prima). L'ultima parola è sua, poi lavori. Le scelte già salvate nel profilo non si richiedono.
 - **Il profilo comanda.** Prima di ogni montaggio rileggi profilo, file del formato e diario delle
   revisioni. Lo stile imparato dall'utente ha sempre la precedenza sulle regole generali.
+- **Impari sempre.** Dalle correzioni (diario delle revisioni) e dagli esempi che l'utente ti dà: ogni
+  video o motion graphic di esempio diventa uno stile della libreria (`montaggio-video/stili/`), rifatto
+  con il codice e applicato con i colori, il brand e i contenuti dell'utente. Più esempi, più stili sai fare.
 - **Mai inventare** numeri, prezzi, citazioni o risultati; mai far passare un contenuto generato per una
   ripresa vera di un fatto o di un prodotto.
 - **Prima il codice, Studio AI per ultimo.** Tutto ciò che si può creare con il codice (motion graphics,
@@ -49,6 +52,7 @@ Leggi il file giusto quando arrivi a quel passaggio:
 | Shorts e reels | [riferimenti/shorts.md](riferimenti/shorts.md) |
 | Revisione (anteprima, confronto, player scena per scena) | [riferimenti/revisione.md](riferimenti/revisione.md) |
 | Profili, video di riferimento, diario, apprendimento | [riferimenti/profili.md](riferimenti/profili.md) |
+| Imparare stili da esempi (libreria degli stili) | [riferimenti/stili.md](riferimenti/stili.md) |
 | Formati di uscita, HDR, controllo finale, DaVinci | [riferimenti/esportazione.md](riferimenti/esportazione.md) |
 | Integrare altre skill | [riferimenti/integrare-skill.md](riferimenti/integrare-skill.md) |
 
@@ -105,8 +109,9 @@ migliore non è l'ultima, tieni quella e dillo. Ogni montaggio ha il suo piano (
 
 ## 5. Piano creativo
 
-Leggendo trascrizione e profilo decidi dove vanno B-roll, grafiche, titoli, scritte, zoom, effetti,
-transizioni, musica ed effetti sonori. Per le scelte importanti proponi e lascia decidere (motore delle
+Leggendo trascrizione, profilo e la libreria degli stili (`montaggio-video/stili/INDICE.md`) decidi dove
+vanno B-roll, grafiche, titoli, scritte, zoom, effetti, transizioni, musica ed effetti sonori, e con quali
+stili imparati. Per le scelte importanti proponi e lascia decidere (motore delle
 grafiche, stile, fonte dei B-roll con il costo). Poi prepara i file e scrivili nel piano
 ([piano.md](riferimenti/piano.md)):
 - grafiche e testi: Remotion (componenti pronti o grafiche su misura scritte per il video) o motore di
@@ -166,3 +171,10 @@ sottotitoli a parte ([esportazione.md](riferimenti/esportazione.md)).
 - Se hai usato `base`, chiedi se salvare le scelte come nuovo profilo.
 - Ogni tanto (o se l'utente lo chiede) mostra l'andamento: `diario.py statistiche --profilo <profilo>`.
 - Per integrare una nuova skill che l'utente porta: [integrare-skill.md](riferimenti/integrare-skill.md).
+
+## Imparare da un esempio
+
+In qualsiasi momento l'utente può darti un video o una motion graphic come esempio ("voglio i titoli
+come in questo video", "impara questo effetto"): analizzalo, scomponilo, rifallo con il codice, confrontalo
+affiancato con l'originale finché lo stile è uguale, mostralo con i suoi colori e salvalo nella libreria
+([stili.md](riferimenti/stili.md)). Da quel momento è uno stile che puoi proporre in ogni video.

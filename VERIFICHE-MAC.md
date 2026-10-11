@@ -43,6 +43,7 @@ Alcune cose però si possono verificare solo sul Mac, con riprese vere. In ordin
 - [ ] **Progetto DaVinci Resolve**: importa il file `.fcpxml` (File > Import > Timeline), poi i sottotitoli
       `.srt`. Controlla che le riprese siano collegate, che grafiche e B-roll siano sulle tracce giuste e che
       i marcatori siano leggibili. Il file XML è valido, ma l'importazione in DaVinci non si è potuta provare.
+- [ ] **Imparare da un esempio**: dai alla skill un video con titoli o grafiche che ti piacciono ("impara questo stile"). Deve analizzarlo, rifarlo con il codice, mostrarti il confronto affiancato e la versione con i tuoi colori, e salvarlo in `montaggio-video/stili/`. Poi, in un video successivo, deve proportelo da sola.
 - [ ] **Grafiche su misura**: chiedi una grafica particolare (es. un grafico che cresce, una mappa): Claude deve scriverla in Remotion invece di usare Studio AI.
 - [ ] **Licenza di Remotion**: gratuita per privati e aziende fino a 3 persone; oltre serve la licenza
       aziendale (remotion.pro). Verifica il tuo caso.

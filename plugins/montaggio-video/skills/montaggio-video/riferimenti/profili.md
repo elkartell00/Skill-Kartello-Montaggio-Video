@@ -50,9 +50,16 @@ aggancio iniziale, stile dei sottotitoli (dimensione, colore, posizione, quante 
 degli zoom, musica ed effetti sonori. Possono servire anche screenshot e descrizioni dell'utente.
 Ispirarsi allo stile sì; copiare loghi, sigle, grafiche identiche o musiche no.
 
+## Stili imparati dagli esempi
+
+Oltre alle regole del profilo, la skill impara stili interi (motion graphics, effetti, modi di montare)
+dagli esempi che l'utente le dà, e li tiene nella libreria comune `montaggio-video/stili/`: vedi
+[stili.md](stili.md). Nel profilo annota quali stili l'utente preferisce per quel canale o cliente
+(es. "titoli: titoli-pop; schede: pillola-che-si-trasforma").
+
 ## Prima di ogni montaggio
 
-Rileggi `profilo.md`, il file del formato e `diario-revisioni.md`: anche gli indizi (correzioni
+Rileggi `profilo.md`, il file del formato, `diario-revisioni.md` e l'indice degli stili (`stili/INDICE.md`): anche gli indizi (correzioni
 specifiche) aiutano a evitare errori già visti. La prima versione deve già tenerne conto.
 
 ## Durante la revisione: annotare

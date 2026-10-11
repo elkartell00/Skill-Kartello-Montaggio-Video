@@ -8,7 +8,8 @@ Trasforma Claude Code in un montatore: dalle riprese grezze (iPhone 4K, anche HD
 Shorts e Reels con tagli di pause ed "ehm", sottotitoli, B-roll (riprese proprie, Studio AI, grafiche
 animate), titoli e grafiche, zoom, transizioni, musica ed effetti sonori. Esporta sempre dagli originali,
 crea il progetto per DaVinci Resolve, si corregge su indicazione (anche scena per scena in un player nel
-browser) e impara lo stile di ogni canale o cliente in profili che migliorano a ogni revisione.
+browser) e impara lo stile di ogni canale o cliente in profili che migliorano a ogni revisione. Impara anche dagli
+esempi: ogni video o motion graphic che le mostri diventa uno stile della sua libreria, rifatto con i tuoi colori.
 
 ## Struttura
 

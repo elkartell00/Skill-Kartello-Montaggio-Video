@@ -13,6 +13,7 @@ montaggio-video/
   da-montare/<progetto>/          le riprese: si leggono e basta, mai modificate, spostate o rinominate
     broll/                        riprese extra (dettagli, lavorazioni, timelapse, prodotti)
   media/<progetto>/               grafiche, animazioni, B-roll generati, musica ed effetti del progetto
+  stili/                          libreria degli stili imparati dagli esempi (comune a tutti i profili)
   risultati/<progetto>/<piano>/   un montaggio (video-lungo, short-1, reel-1...):
     vNN/                          una cartella per versione: anteprima, video finale, sottotitoli, piano usato,
                                   controllo, pagine di revisione, progetto DaVinci

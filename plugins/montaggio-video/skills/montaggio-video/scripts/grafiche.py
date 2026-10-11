@@ -59,6 +59,9 @@ def prepara():
     if salvata:
         shutil.rmtree(dest / "src" / "su-misura")
         shutil.move(str(salvata), str(su_misura))
+    # Gli stili imparati dagli esempi (montaggio-video/stili/) entrano nel progetto Remotion.
+    from stili import sincronizza
+    sincronizza(silenzioso=True)
     fonts = dest / "public" / "fonts"
     fonts.mkdir(parents=True, exist_ok=True)
     for f in (SKILL_DIR / "assets" / "fonts").glob("*.ttf"):

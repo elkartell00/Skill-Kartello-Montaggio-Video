@@ -2,6 +2,21 @@
 
 Ogni modifica alla skill, comprese le parti integrate da altre skill (con la fonte e il motivo).
 
+## 0.10.0 – Imparare dagli esempi: la libreria degli stili
+
+### Nuovo
+- **Libreria degli stili** (`montaggio-video/stili/`, comune a tutti i profili): ogni video o motion graphic di
+  esempio che l'utente dà diventa uno stile riutilizzabile, rifatto con il codice e applicato con i colori, il
+  brand e i contenuti dell'utente. Più esempi, più stili ed effetti la skill sa fare.
+- `stili.py`: `analizza` (copia ridotta dell'esempio, fogli con 8 fotogrammi al secondo, tagli, raffiche di
+  movimento con durata e andamento, palette), `confronta` (esempio e riproduzione affiancati agli stessi
+  istanti), `sincronizza` (gli stili entrano nel progetto Remotion), `indice` (`stili/INDICE.md`), `salva`
+  (modifica datata e annullabile, come i profili), `elenca`.
+- Remotion carica in automatico gli stili della libreria (`src/stili/`), accanto alle grafiche su misura.
+- Guida `riferimenti/stili.md` e scheda di stile modello; esempio completo in
+  `esempi/stili/pillola-che-si-trasforma/` (imparato da una clip di motion-broll e rifatto con altri colori).
+- `SKILL.md`, profili e grafiche: il piano creativo consulta la libreria; il profilo annota gli stili preferiti.
+
 ## 0.9.0 – Tappe 2–7: grafiche, effetti, audio, B-roll, shorts, profili, DaVinci, revisione, integrazioni
 
 ### Nuovo
