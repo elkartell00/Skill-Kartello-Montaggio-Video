@@ -42,7 +42,9 @@ def prepara():
     if not py.exists():
         errore("manca l'ambiente Python della skill: esegui prima verifica_strumenti.py --installa")
     info("Installo PyTorch e transformers per la separazione (circa 2 GB) ...")
-    r = subprocess.run([str(py), "-m", "pip", "install", "torch", "transformers", "opencv-python-headless<5", "pillow", "numpy"])
+    # torchvision serve al processore di SAM 2.1 in transformers: senza, il modello non si carica.
+    r = subprocess.run([str(py), "-m", "pip", "install", "torch", "torchvision", "transformers",
+                        "opencv-python-headless<5", "pillow", "numpy"])
     if r.returncode != 0:
         errore("installazione non riuscita. Controlla la connessione e riprova.")
     info("Pronto. Il modello si scarica al primo utilizzo.")

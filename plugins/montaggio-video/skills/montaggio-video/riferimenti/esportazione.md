@@ -64,10 +64,12 @@ risultato è in `<video>.controllo.json`. Un controllo fallito va sistemato prim
 
 `risultati/<progetto>/<piano>/vNN/`: `anteprima.mp4`, `<progetto>-<piano>-vNN.mp4` (finale),
 `sottotitoli.srt`/`.ass`, `piano.json` (il piano usato: per tornare indietro), `riepilogo-tagli.md`,
-`*.controllo.json`, pagine di revisione e cartella `davinci/`. Ogni anteprima crea una nuova versione;
+`*.controllo.json`, pagine di revisione e, se richiesta, cartella `davinci/`. Ogni anteprima crea una nuova versione;
 l'export finale va nella versione più recente se il piano non è cambiato.
 
-## Progetto per DaVinci Resolve
+## Progetto per DaVinci Resolve (in riserva)
+
+Per ora l'utente non usa DaVinci: crea il progetto **solo se lo chiede**. Lo script resta pronto.
 
 ```bash
 $PY $SKILL/scripts/davinci.py --progetto <nome> --piano <piano> [--versione vNN]

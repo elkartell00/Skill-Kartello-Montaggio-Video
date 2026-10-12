@@ -7,7 +7,7 @@ Marketplace di plugin per [Claude Code](https://code.claude.com) con le skill di
 Trasforma Claude Code in un montatore: dalle riprese grezze (iPhone 4K, anche HDR) a video lunghi YouTube,
 Shorts e Reels con tagli di pause ed "ehm", sottotitoli, B-roll (riprese proprie, Studio AI, grafiche
 animate), titoli e grafiche, zoom, transizioni, musica ed effetti sonori. Esporta sempre dagli originali,
-crea il progetto per DaVinci Resolve, si corregge su indicazione (anche scena per scena in un player nel
+su richiesta crea il progetto per DaVinci Resolve, si corregge su indicazione (anche scena per scena in un player nel
 browser) e impara lo stile di ogni canale o cliente in profili che migliorano a ogni revisione. Impara anche dagli
 esempi: ogni video o motion graphic che le mostri diventa uno stile della sua libreria, rifatto con i tuoi colori.
 
@@ -44,7 +44,7 @@ Oppure dentro una sessione: `/plugin marketplace add elkartell00/Skill-Kartello-
 
 La skill si richiama con `/montaggio-video:montaggio-video`, oppure Claude la usa da sola quando chiedi di montare un video ("monta questo video per [profilo], versione lunga più 3 shorts").
 
-Requisiti sul Mac: [Homebrew](https://brew.sh), poi `brew install ffmpeg node python git`. Al primo utilizzo la skill controlla gli strumenti e, se gli dai il permesso, installa Whisper in un ambiente Python suo, dentro la cartella di lavoro `montaggio-video/`.
+Requisiti sul Mac: [Homebrew](https://brew.sh), poi `brew install ffmpeg-full node python@3.12 git` (serve `ffmpeg-full`: il normale `ffmpeg` non ha la conversione HDR né i sottotitoli bruciati). Al primo utilizzo la skill controlla gli strumenti e, se gli dai il permesso, installa Whisper in un ambiente Python suo, dentro la cartella di lavoro `montaggio-video/`.
 
 ## Sviluppo
 

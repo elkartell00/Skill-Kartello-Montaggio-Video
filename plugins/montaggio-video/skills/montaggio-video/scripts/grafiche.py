@@ -22,13 +22,74 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from comune import SKILL_DIR, cartella_lavoro, errore, info  # noqa: E402
+from comune import SKILL_DIR, avviso, cartella_lavoro, errore, info  # noqa: E402
 
 MAC = platform.system() == "Darwin"
 
 
 def cartella_strumenti():
     return cartella_lavoro() / ".strumenti" / "grafiche"
+
+
+def npx():
+    return shutil.which("npx") or shutil.which("npx.cmd") or "npx"
+
+
+def browser_playwright():
+    """Il Chrome Headless Shell scaricato da Playwright (il più recente), o None."""
+    base = os.environ.get("PLAYWRIGHT_BROWSERS_PATH")
+    if base and base != "0":
+        cache = Path(base)
+    elif MAC:
+        cache = Path.home() / "Library" / "Caches" / "ms-playwright"
+    elif os.name == "nt":
+        cache = Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / "ms-playwright"
+    else:
+        cache = Path.home() / ".cache" / "ms-playwright"
+    nome = "chrome-headless-shell.exe" if os.name == "nt" else "chrome-headless-shell"
+    trovati = []
+    for exe in cache.glob(f"chromium_headless_shell-*/chrome-headless-shell-*/{nome}"):
+        rev = exe.parent.parent.name.rsplit("-", 1)[-1]
+        trovati.append((int(rev) if rev.isdigit() else 0, exe))
+    return max(trovati)[1] if trovati else None
+
+
+def file_browser_remotion():
+    # Scritto da `prepara` quando Remotion non riesce a scaricare il suo browser e usa quello di Playwright.
+    return cartella_strumenti() / "browser-remotion.txt"
+
+
+def opzioni_browser_remotion():
+    scelto = os.environ.get("MONTAGGIO_REMOTION_BROWSER")
+    f = file_browser_remotion()
+    if not scelto and f.exists():
+        scelto = f.read_text(encoding="utf-8").strip()
+        if not Path(scelto).exists():
+            scelto = None
+    return [f"--browser-executable={scelto}"] if scelto else []
+
+
+def prova_playwright(dest):
+    """Avvia e chiude il browser del motore di animazione: True se funziona."""
+    codice = ("const o = process.env.MONTAGGIO_CHROMIUM ? {executablePath: process.env.MONTAGGIO_CHROMIUM} : {};"
+              "require('playwright').chromium.launch(o).then(b => b.close())"
+              ".catch(e => { console.error(e.message.split('\\n')[0]); process.exit(1); });")
+    r = subprocess.run([shutil.which("node") or "node", "-e", codice], cwd=dest, capture_output=True, text=True)
+    if r.returncode != 0:
+        avviso((r.stderr or r.stdout).strip()[-400:])
+    return r.returncode == 0
+
+
+def prova_remotion(dest, opzioni):
+    """Crea un fotogramma di prova: True se Remotion funziona con quel browser."""
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp:
+        props, png = Path(tmp) / "props.json", Path(tmp) / "prova.png"
+        props.write_text(json.dumps({"larghezza": 320, "altezza": 180, "fps": 30, "durata": 1, "testo": "Prova"}),
+                         encoding="utf-8")
+        r = subprocess.run([npx(), "remotion", "still", "src/index.ts", "Titolo", str(png), f"--props={props}",
+                            "--frame=15", "--timeout=60000", *opzioni], cwd=dest, capture_output=True, text=True)
+        return r.returncode == 0 and png.exists()
 
 
 def npm():
@@ -71,9 +132,41 @@ def prepara():
         r = subprocess.run([npm(), "install", "--no-audit", "--no-fund"], cwd=dest)
         if r.returncode != 0:
             errore("installazione delle librerie per le grafiche non riuscita. Controlla la connessione e riprova.")
+    problemi = []
+    # Browser del motore di animazione. Playwright prova più server; un errore di rete passeggero
+    # interrompe il download a metà (resta Chromium ma non il Headless Shell), quindi si riprova.
     if not os.environ.get("MONTAGGIO_CHROMIUM"):
         info("Scarico il browser per il motore di animazione (Chromium) ...")
-        subprocess.run([shutil.which("npx") or "npx", "playwright", "install", "chromium"], cwd=dest)
+        for _ in range(3):
+            subprocess.run([npx(), "playwright", "install", "chromium"], cwd=dest)
+            if prova_playwright(dest):
+                break
+            avviso("il browser del motore di animazione non è completo, riprovo ...")
+        else:
+            problemi.append("il browser del motore di animazione (Playwright) non si è scaricato")
+    elif not prova_playwright(dest):
+        problemi.append("il browser indicato in MONTAGGIO_CHROMIUM non si avvia")
+    # Browser di Remotion: lo scarica da remotion.media e si prova con un fotogramma vero. Se non si scarica
+    # (rete, filtro DNS) o non funziona su questo computer (sul Mac la sua versione speciale può restare ferma
+    # su "Waiting for root component to load"), Remotion usa il Headless Shell di Playwright, che va bene uguale.
+    f = file_browser_remotion()
+    if f.exists():
+        f.unlink()
+    if not os.environ.get("MONTAGGIO_REMOTION_BROWSER"):
+        info("Preparo e provo il browser di Remotion ...")
+        subprocess.run([npx(), "remotion", "browser", "ensure"], cwd=dest, capture_output=True, text=True)
+        if not prova_remotion(dest, []):
+            alternativo = browser_playwright()
+            if alternativo and prova_remotion(dest, [f"--browser-executable={alternativo}"]):
+                f.write_text(str(alternativo), encoding="utf-8")
+                info(f"Il browser di Remotion non funziona qui: Remotion userà quello di Playwright ({alternativo}).")
+            else:
+                problemi.append("Remotion non riesce a creare le grafiche, né con il suo browser né con quello di Playwright")
+    elif not prova_remotion(dest, opzioni_browser_remotion()):
+        problemi.append("il browser indicato in MONTAGGIO_REMOTION_BROWSER non funziona con Remotion")
+    if problemi:
+        errore("grafiche non pronte: " + "; ".join(problemi) + ". Controlla la connessione e rilancia "
+               "`grafiche.py prepara` (riprende da dove si è fermato).")
     info(f"Grafiche pronte in {dest}")
 
 
@@ -94,15 +187,14 @@ def remotion(tipo, props, uscita):
     uscita = Path(uscita).resolve()
     uscita.parent.mkdir(parents=True, exist_ok=True)
     trasparente = uscita.suffix.lower() == ".mov"
-    cmd = [shutil.which("npx") or "npx", "remotion", "render", "src/index.ts", tipo, str(uscita), f"--props={props}"]
+    cmd = [npx(), "remotion", "render", "src/index.ts", tipo, str(uscita), f"--props={props}"]
     if trasparente:
         cmd += ["--codec=prores", "--prores-profile=4444", "--pixel-format=yuva444p10le", "--image-format=png"]
     else:
         cmd += ["--codec=h264", "--crf=14"]
-    # Remotion scarica da solo il suo browser al primo render; questa variabile serve solo
-    # dove il download non è possibile (ambienti senza rete).
-    if os.environ.get("MONTAGGIO_REMOTION_BROWSER"):
-        cmd += [f"--browser-executable={os.environ['MONTAGGIO_REMOTION_BROWSER']}"]
+    # Browser: quello di Remotion, o quello scelto con MONTAGGIO_REMOTION_BROWSER, o quello di Playwright
+    # se `prepara` ha visto che il browser di Remotion qui non funziona.
+    cmd += opzioni_browser_remotion()
     info(f"Render {tipo} -> {uscita.name} ...")
     r = subprocess.run(cmd, cwd=d, capture_output=True, text=True)
     if r.returncode != 0:
@@ -117,9 +209,8 @@ def immagine(tipo, props, uscita, secondo=None):
     uscita = Path(uscita).resolve()
     uscita.parent.mkdir(parents=True, exist_ok=True)
     fotogramma = int(round(float(secondo if secondo is not None else max(0.0, dati.get("durata", 1) - 0.1)) * float(dati.get("fps", 30))))
-    cmd = [shutil.which("npx") or "npx", "remotion", "still", "src/index.ts", tipo, str(uscita), f"--props={props}", f"--frame={fotogramma}"]
-    if os.environ.get("MONTAGGIO_REMOTION_BROWSER"):
-        cmd += [f"--browser-executable={os.environ['MONTAGGIO_REMOTION_BROWSER']}"]
+    cmd = [npx(), "remotion", "still", "src/index.ts", tipo, str(uscita), f"--props={props}", f"--frame={fotogramma}"]
+    cmd += opzioni_browser_remotion()
     r = subprocess.run(cmd, cwd=d, capture_output=True, text=True)
     if r.returncode != 0:
         errore(f"immagine {tipo} non riuscita:\n" + "\n".join((r.stderr or r.stdout).strip().splitlines()[-12:]))

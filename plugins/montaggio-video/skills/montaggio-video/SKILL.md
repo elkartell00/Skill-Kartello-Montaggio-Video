@@ -1,6 +1,6 @@
 ---
 name: montaggio-video
-description: Montatore video professionista che sostituisce CapCut. Monta in automatico le riprese grezze (iPhone 4K, anche HDR Dolby Vision) in video lunghi YouTube, Shorts e Reels con tagli di pause ed "ehm", frasi ripetute, sottotitoli parola per parola, B-roll (riprese proprie, Studio AI, grafiche animate), titoli e grafiche Remotion, zoom, transizioni, effetti, musica ed effetti sonori, esportazione sempre dagli originali e progetto DaVinci Resolve; poi corregge su indicazione dell'utente (anche scena per scena nel player di revisione) e impara il suo stile per profilo e dagli esempi che le dà (rifà con il codice motion graphics ed effetti di altri video con i colori e il brand dell'utente, e li tiene in una libreria di stili). Usala ogni volta che l'utente vuole montare, tagliare, sottotitolare, accorciare o rifinire un video, ricavare shorts o reels, creare o modificare un profilo di stile per un canale o cliente, rivedere una versione, o dice "monta questo video", "togli le pause", "fammi 3 shorts", "impara questo stile", "voglio le grafiche come in questo video", "Revisione Motion OS per", anche se non dice la parola "montaggio".
+description: Montatore video pro che sostituisce CapCut. Monta da solo le riprese grezze (iPhone 4K, anche HDR) in video lunghi YouTube, Shorts e Reels con tagli di pause, "ehm" e frasi ripetute, sottotitoli parola per parola, B-roll (riprese proprie, Studio AI, grafiche), titoli e grafiche Remotion, zoom, transizioni, effetti, musica e suoni, esportazione dagli originali (DaVinci su richiesta); poi corregge su indicazione (anche scena per scena nel player) e impara il suo stile per profilo e dagli esempi che le dà (rifà motion graphics ed effetti di altri video col suo brand, in una libreria di stili). Usala quando l'utente vuole montare, tagliare, sottotitolare, accorciare o rifinire un video, ricavarne shorts o reels, creare o modificare un profilo di stile per canale o cliente, rivedere una versione o dice "monta questo video", "togli le pause", "fammi 3 shorts", "impara questo stile", "voglio le grafiche come in questo video", "Revisione Motion OS per", anche senza dire "montaggio".
 argument-hint: "[video o cartella] [profilo] [formati]"
 ---
 
@@ -31,9 +31,10 @@ non è un tecnico e anche suo padre usa la skill dal suo computer.
 - **Prima il codice, Studio AI per ultimo.** Tutto ciò che si può creare con il codice (motion graphics,
   animazioni, B-roll animati, titoli, schede, grafici, immagini, miniature) lo crei tu, con Remotion, il
   motore di animazione o grafiche su misura scritte per quel video, e ci provi in ogni modo prima di
-  arrenderti. Studio AI per immagini e video è l'ultima risorsa, solo quando con il codice non ci si arriva
-  (per esempio una scena realistica che nessuna ripresa mostra), e prima di generare mostri il costo
-  totale stimato e aspetti il sì.
+  arrenderti. Anche B-roll ed effetti nascono prima con il codice: fai la versione col codice e la mostri.
+  Studio AI per immagini e video è l'ultima risorsa: solo se quella versione non convince l'utente o se con
+  il codice non ci si arriva (per esempio una scena realistica che nessuna ripresa mostra), e prima di
+  generare mostri il costo totale stimato e aspetti il sì.
 
 ## Mappa dei riferimenti
 
@@ -53,7 +54,7 @@ Leggi il file giusto quando arrivi a quel passaggio:
 | Revisione (anteprima, confronto, player scena per scena) | [riferimenti/revisione.md](riferimenti/revisione.md) |
 | Profili, video di riferimento, diario, apprendimento | [riferimenti/profili.md](riferimenti/profili.md) |
 | Imparare stili da esempi (libreria degli stili) | [riferimenti/stili.md](riferimenti/stili.md) |
-| Formati di uscita, HDR, controllo finale, DaVinci | [riferimenti/esportazione.md](riferimenti/esportazione.md) |
+| Formati di uscita, HDR, controllo finale, DaVinci (in riserva) | [riferimenti/esportazione.md](riferimenti/esportazione.md) |
 | Integrare altre skill | [riferimenti/integrare-skill.md](riferimenti/integrare-skill.md) |
 
 ## 0. Avvio
@@ -64,7 +65,9 @@ Lavora nella cartella da cui è stata avviata la skill: lì gli script creano `m
    chiedi il permesso di installarlo:
    - ambiente Python con Whisper e OpenCV: `python3 $SKILL/scripts/verifica_strumenti.py --installa`;
    - grafiche (Remotion, Playwright, Chromium, circa 400 MB, solo quando servono): `$PY $SKILL/scripts/grafiche.py prepara`;
-   - FFmpeg, Node, git: con Homebrew (`brew install ffmpeg node git`).
+   - FFmpeg, Node, Python, git: con Homebrew (`brew install ffmpeg-full node python@3.12 git`). Serve
+     `ffmpeg-full`: il normale `ffmpeg` non ha la conversione HDR né i sottotitoli bruciati.
+     Se `python3` è più vecchio del 3.10, lancia `verifica_strumenti.py --installa` con `python3.12`.
 2. Da qui in poi: `PY=montaggio-video/.strumenti/venv/bin/python`.
 3. Profili: `$PY $SKILL/scripts/profili.py elenca`. Se c'è solo `base` è il primo utilizzo: chiedi se
    creare subito i profili ([profili.md](riferimenti/profili.md)).
@@ -154,14 +157,14 @@ soggetto, sottotitoli parola per parola, finale a loop dove ha senso ([shorts.md
 
 ```bash
 $PY $SKILL/scripts/esporta.py --progetto <nome> --piano <piano> --modo finale --sottotitoli file|brucia --tonemap <scelta>
-$PY $SKILL/scripts/davinci.py --progetto <nome> --piano <piano>
 ```
 
 Video lungo 3840x2160 (sottotitoli di solito a parte), shorts e reels 1080x1920 (sottotitoli bruciati). Su
 Mac `--encoder videotoolbox` è molto più veloce con qualità di poco inferiore: proponilo se c'è fretta. Il
-controllo automatico (risoluzione, fps, durata, sincronia, volume) deve passare prima di consegnare. Il
-progetto DaVinci è sempre da creare: collegato agli originali, con grafiche e B-roll come clip separate e i
-sottotitoli a parte ([esportazione.md](riferimenti/esportazione.md)).
+controllo automatico (risoluzione, fps, durata, sincronia, volume) deve passare prima di consegnare.
+
+Il progetto DaVinci Resolve è **in riserva**: non crearlo e non proporlo di base, solo se l'utente lo chiede
+(`davinci.py`, [esportazione.md](riferimenti/esportazione.md#progetto-per-davinci-resolve-in-riserva)).
 
 ## 10. Fine lavoro
 

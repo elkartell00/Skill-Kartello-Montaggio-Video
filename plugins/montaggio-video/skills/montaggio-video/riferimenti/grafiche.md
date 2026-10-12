@@ -16,7 +16,7 @@ Installa in `montaggio-video/.strumenti/grafiche/` Remotion, Playwright e Chromi
 
 Tutte le grafiche si salvano in `montaggio-video/media/<progetto>/` e si aggiungono al piano come
 `sovrapposizioni` (vedi [piano.md](piano.md)). Restano file separati a piena risoluzione: vanno anche
-nel progetto DaVinci.
+nel progetto DaVinci, se richiesto.
 
 ## Remotion
 

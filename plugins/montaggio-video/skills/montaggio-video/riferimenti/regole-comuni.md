@@ -16,7 +16,7 @@ montaggio-video/
   stili/                          libreria degli stili imparati dagli esempi (comune a tutti i profili)
   risultati/<progetto>/<piano>/   un montaggio (video-lungo, short-1, reel-1...):
     vNN/                          una cartella per versione: anteprima, video finale, sottotitoli, piano usato,
-                                  controllo, pagine di revisione, progetto DaVinci
+                                  controllo, pagine di revisione, progetto DaVinci (se richiesto)
     reel.json                     per il player di revisione scena per scena
   .lavoro/<progetto>/             analisi, audio per Whisper, trascrizione, piani/, sottotitoli/, segmenti già
                                   codificati, separazione del soggetto

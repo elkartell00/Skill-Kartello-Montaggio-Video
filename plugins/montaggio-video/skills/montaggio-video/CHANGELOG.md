@@ -2,6 +2,34 @@
 
 Ogni modifica alla skill, comprese le parti integrate da altre skill (con la fonte e il motivo).
 
+## 0.10.1 – Correzioni dalla prima installazione su Mac
+
+### Corretto
+- **Python dell'ambiente**: `verifica_strumenti.py --installa` creava l'ambiente con il Python che lo lanciava,
+  sul Mac spesso il 3.9 di Xcode (troppo vecchio per Whisper, OpenCV e PyTorch recenti). Ora sceglie da solo
+  Python 3.12, 3.13, 3.11 o 3.10 (Homebrew compreso), ricrea un ambiente più vecchio del 3.10 e mostra la
+  versione nel controllo.
+- **FFmpeg**: il normale `brew install ffmpeg` non ha `zscale` (HDR) né `subtitles` (sottotitoli bruciati).
+  Ora la skill consiglia `brew install ffmpeg-full` e gli script lo usano da soli anche se nel PATH resta il
+  normale ffmpeg (`comune.py`); il controllo mostra quale FFmpeg viene usato e segnala anche `subtitles`.
+- **Separazione del soggetto**: `separa_soggetto.py prepara` non installava `torchvision`, senza il quale
+  SAM 2.1 non si carica; il controllo ora lo verifica.
+- **Grafiche**: `grafiche.py prepara` diceva "pronte" anche quando il download dei browser falliva. Ora riprova
+  Playwright fino a 3 volte e controlla che il browser parta davvero; per Remotion crea un fotogramma di
+  prova e, se il suo browser non si scarica o non funziona (sul Mac la sua versione speciale restava ferma su
+  "Waiting for root component to load"), usa il Headless Shell di Playwright e se lo ricorda
+  (`.strumenti/grafiche/browser-remotion.txt`). Se qualcosa resta rotto lo dice chiaramente.
+- Istruzioni d'installazione (`SKILL.md`, `README.md`, `VERIFICHE-MAC.md`): `ffmpeg-full`, `python@3.12` e il
+  nome della repository senza la "s" (`Skill-Kartello-Montaggio-Video`).
+
+### Cambiato (decisioni dell'utente)
+- **DaVinci Resolve in riserva**: il progetto DaVinci non si crea più a ogni esportazione e non si propone;
+  `davinci.py` resta pronto e si usa solo se l'utente lo chiede.
+- **Prima il codice, anche per B-roll ed effetti**: si fa sempre prima la versione col codice e la si mostra;
+  Studio AI solo se quella non convince l'utente o se col codice non ci si arriva (costo sempre prima).
+- Licenza di Remotion verificata: l'utente lavora da solo, quindi è gratuita.
+- Descrizione di `SKILL.md` accorciata sotto i 1024 caratteri (limite di claude.ai), uguale alla versione installata.
+
 ## 0.10.0 – Imparare dagli esempi: la libreria degli stili
 
 ### Nuovo

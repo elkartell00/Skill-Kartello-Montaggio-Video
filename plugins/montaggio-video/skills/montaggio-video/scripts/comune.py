@@ -15,6 +15,15 @@ from pathlib import Path
 
 SKILL_DIR = Path(__file__).resolve().parent.parent
 
+# Su Mac il normale `brew install ffmpeg` non ha zscale (HDR) né libass (sottotitoli bruciati): servono in
+# ffmpeg-full, che Homebrew installa a parte senza metterlo nel PATH. Se c'è, gli script usano quello.
+for _d in ("/opt/homebrew/opt/ffmpeg-full/bin", "/usr/local/opt/ffmpeg-full/bin"):
+    if os.path.isfile(os.path.join(_d, "ffmpeg")):
+        _path = os.environ.get("PATH", "").split(os.pathsep)
+        if _d not in _path:
+            os.environ["PATH"] = os.pathsep.join([_d] + _path)
+        break
+
 # Sul Mac la decodifica HEVC 4K passa dal chip video (VideoToolbox): molto più veloce.
 DECODIFICA_HW = ["-hwaccel", "videotoolbox"] if platform.system() == "Darwin" else []
 
@@ -102,7 +111,7 @@ def esegui(cmd, cattura=False, descrizione=None):
 
 
 def ffprobe(percorso):
-    richiedi("ffprobe", "Installa FFmpeg (su Mac: brew install ffmpeg).")
+    richiedi("ffprobe", "Installa FFmpeg (su Mac: brew install ffmpeg-full).")
     out = esegui(["ffprobe", "-v", "error", "-print_format", "json", "-show_streams", "-show_format",
                   str(percorso)], cattura=True, descrizione=f"lettura di {Path(percorso).name}")
     return json.loads(out)

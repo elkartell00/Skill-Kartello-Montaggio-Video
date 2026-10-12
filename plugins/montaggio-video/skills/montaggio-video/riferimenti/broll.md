@@ -12,8 +12,9 @@ Il B-roll copre il parlato con immagini che mostrano ciò di cui si sta parlando
    passare oltre: è la regola dell'utente.
 3. **Archivi gratuiti** (Pexels, Pixabay), solo se il profilo li prevede.
 4. **Studio AI**, ultima risorsa (vedi [studio-ai.md](studio-ai.md)): solo quando con il codice non si
-   arriva (una scena realistica, un ambiente, un oggetto fotografico che nessuna ripresa mostra) e l'idea
-   si può mostrare senza ingannare. Prima mostra il costo e aspetta il sì.
+   arriva (una scena realistica, un ambiente, un oggetto fotografico che nessuna ripresa mostra) oppure
+   quando l'utente ha visto la versione fatta col codice e non lo convince; sempre se l'idea si può
+   mostrare senza ingannare. Prima mostra il costo e aspetta il sì.
 
 ## Flusso
 
@@ -30,8 +31,8 @@ Il B-roll copre il parlato con immagini che mostrano ciò di cui si sta parlando
    con il **costo totale stimato** dei contenuti AI. Aspetta il sì.
 4. **Prepara i file** in `montaggio-video/media/<progetto>/broll/`:
    - proprie: usale direttamente dal percorso originale (non copiarle); `inizio_file` sceglie il tratto;
-   - codice: render con `grafiche.py` (Remotion) o con il motore di animazione;
-   - Studio AI (solo ciò che il codice non può fare): un solo `genera_lotto` (vedi studio-ai.md); mentre Veo lavora prepara il resto;
+   - codice: render con `grafiche.py` (Remotion) o con il motore di animazione, e mostralo all'utente;
+   - Studio AI (solo ciò che il codice non può fare o che col codice non ha convinto): un solo `genera_lotto` (vedi studio-ai.md); mentre Veo lavora prepara il resto;
    - archivi: `broll.py archivi --cerca "..." --orientamento orizzontale|verticale` (serve la chiave dell'utente).
 5. **Nel piano:** una sovrapposizione per B-roll, `modo: "pieno"` (o `riquadro` per un dettaglio in
    un angolo), `dissolvenza: 0.1–0.2` se il profilo la vuole, altrimenti taglio netto.

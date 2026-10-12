@@ -9,6 +9,7 @@ cancellando quella cartella si rimuove tutto. Gli altri script vanno eseguiti co
 """
 import argparse
 import json
+import os
 import platform
 import shutil
 import subprocess
@@ -23,9 +24,37 @@ APPLE_SILICON = MAC and platform.machine() == "arm64"
 WINDOWS = platform.system() == "Windows"
 
 
+# Whisper, OpenCV e PyTorch vogliono Python 3.10+; le versioni appena uscite spesso non hanno ancora i
+# pacchetti pronti, quindi si preferiscono quelle collaudate. Sul Mac `python3` è spesso il 3.9 di Xcode.
+PYTHON_PREFERITI = [(3, 12), (3, 13), (3, 11), (3, 10)]
+PYTHON_MINIMO = (3, 10)
+
+
 def python_venv(root):
     venv = root / ".strumenti" / "venv"
     return venv / ("Scripts/python.exe" if WINDOWS else "bin/python"), venv
+
+
+def versione_python(exe):
+    try:
+        out = subprocess.run([str(exe), "-c", "import sys; print(*sys.version_info[:2])"],
+                             capture_output=True, text=True, timeout=30).stdout.split()
+        return tuple(int(x) for x in out[:2]) if len(out) >= 2 else None
+    except (OSError, subprocess.SubprocessError, ValueError):
+        return None
+
+
+def scegli_python():
+    """Il Python con cui creare l'ambiente della skill, o None se non ce n'è uno adatto."""
+    cartelle = ["/opt/homebrew/bin", "/usr/local/bin"] if MAC else []
+    for v in PYTHON_PREFERITI:
+        nome = f"python{v[0]}.{v[1]}"
+        for exe in [shutil.which(nome)] + [os.path.join(c, nome) for c in cartelle]:
+            if exe and os.path.isfile(exe) and versione_python(exe) == v:
+                return exe
+    if sys.version_info[:2] >= PYTHON_MINIMO:
+        return sys.executable
+    return None
 
 
 def ha_filtri(nomi):
@@ -71,14 +100,16 @@ def controlla(root):
         "prores": ha_encoder("prores_ks"),
         "videotoolbox": ha_encoder("hevc_videotoolbox"),
         "node": shutil.which("node") is not None,
+        "ffmpeg_percorso": shutil.which("ffmpeg"),
         "venv": py.exists(),
         "python_venv": str(py),
+        "versione_venv": versione_python(py) if py.exists() else None,
         "numpy": modulo_in(py, "numpy"),
         "whisper": modulo_in(py, backend_whisper()),
         "opencv": modulo_in(py, "cv2"),
         "git": shutil.which("git") is not None,
         "grafiche": (root / ".strumenti" / "grafiche" / "node_modules" / "remotion").exists(),
-        "separazione": modulo_in(py, "transformers"),
+        "separazione": modulo_in(py, "transformers") and modulo_in(py, "torchvision"),
         "backend_whisper": backend_whisper(),
     }
     return stato
@@ -87,14 +118,16 @@ def controlla(root):
 def stampa(stato):
     ok = lambda b: "ok" if b else "MANCA"
     print(f"Sistema: {stato['sistema']}")
-    print(f"- FFmpeg / ffprobe: {ok(stato['ffmpeg'] and stato['ffprobe'])}")
+    print(f"- FFmpeg / ffprobe: {ok(stato['ffmpeg'] and stato['ffprobe'])}  ({stato['ffmpeg_percorso'] or '-'})")
     for f in ["zscale", "tonemap", "loudnorm", "silencedetect", "ebur128", "subtitles", "xfade"]:
         print(f"  - filtro {f}: {ok(stato['filtri'][f])}")
     print(f"  - ProRes con trasparenza (prores_ks): {ok(stato['prores'])}")
     if MAC:
         print(f"  - codifica hardware del Mac (VideoToolbox): {ok(stato['videotoolbox'])}")
     print(f"- Node.js (grafiche): {ok(stato['node'])}")
-    print(f"- Ambiente Python della skill: {ok(stato['venv'])}  ({stato['python_venv']})")
+    v = stato["versione_venv"]
+    print(f"- Ambiente Python della skill: {ok(stato['venv'])}  ({stato['python_venv']}"
+          + (f", Python {v[0]}.{v[1]})" if v else ")"))
     print(f"  - numpy: {ok(stato['numpy'])}")
     print(f"  - Whisper ({stato['backend_whisper']}): {ok(stato['whisper'])}")
     print(f"  - OpenCV (riinquadratura): {ok(stato['opencv'])}")
@@ -104,12 +137,19 @@ def stampa(stato):
 
     consigli = []
     if not stato["ffmpeg"] or not stato["ffprobe"]:
-        consigli.append("Installa FFmpeg: su Mac `brew install ffmpeg` (serve Homebrew: https://brew.sh).")
-    elif not (stato["filtri"]["zscale"] and stato["filtri"]["tonemap"]):
-        consigli.append("Il tuo FFmpeg non ha i filtri per convertire l'HDR (zscale/tonemap). Su Mac: `brew reinstall ffmpeg`.")
+        consigli.append("Installa FFmpeg: su Mac `brew install ffmpeg-full` (serve Homebrew: https://brew.sh).")
+    else:
+        mancano = [f for f in ("zscale", "tonemap", "subtitles") if not stato["filtri"][f]]
+        if mancano:
+            consigli.append(f"Il tuo FFmpeg non ha {', '.join(mancano)} (servono per l'HDR e i sottotitoli bruciati). "
+                            "Su Mac: `brew install ffmpeg-full`; gli script lo usano da soli, anche se resta "
+                            "installato il normale ffmpeg.")
     if not stato["node"]:
         consigli.append("Installa Node.js (serve dalla tappa delle grafiche): su Mac `brew install node`.")
-    if not (stato["venv"] and stato["numpy"] and stato["whisper"] and stato["opencv"]):
+    if v and v < PYTHON_MINIMO:
+        consigli.append(f"L'ambiente Python usa Python {v[0]}.{v[1]}, troppo vecchio: rilancia con --installa "
+                        "per ricrearlo (su Mac prima `brew install python@3.12`).")
+    elif not (stato["venv"] and stato["numpy"] and stato["whisper"] and stato["opencv"]):
         consigli.append("Manca l'ambiente Python con Whisper: rilancia questo script con --installa (chiedi prima all'utente).")
     if consigli:
         print("\nDa fare:")
@@ -121,12 +161,22 @@ def stampa(stato):
 
 def installa(root):
     py, venv = python_venv(root)
+    if py.exists():
+        v = versione_python(py)
+        if v and v < PYTHON_MINIMO:
+            print(f"L'ambiente Python esistente usa Python {v[0]}.{v[1]}, troppo vecchio: lo ricreo.")
+            shutil.rmtree(venv)
     if not py.exists():
-        print(f"Creo l'ambiente Python in {venv} ...")
+        base = scegli_python()
+        if not base:
+            print("ERRORE: serve Python 3.10 o più recente (consigliato 3.12). Su Mac: `brew install python@3.12`, "
+                  "poi rilancia.", file=sys.stderr)
+            sys.exit(1)
+        print(f"Creo l'ambiente Python in {venv} con {base} ...")
         venv.parent.mkdir(parents=True, exist_ok=True)
-        r = subprocess.run([sys.executable, "-m", "venv", str(venv)])
+        r = subprocess.run([base, "-m", "venv", str(venv)])
         if r.returncode != 0:
-            print("ERRORE: non riesco a creare l'ambiente Python. Su Mac installa Python con `brew install python`.", file=sys.stderr)
+            print("ERRORE: non riesco a creare l'ambiente Python. Su Mac installa Python con `brew install python@3.12`.", file=sys.stderr)
             sys.exit(1)
     # OpenCV 4.x: la 5 non ha più il rilevatore di volti classico (serve per la riinquadratura).
     pacchetti = ["numpy", "opencv-python-headless<5", pacchetto_whisper()]
